@@ -92,3 +92,5 @@ def get_new_live_chat_messages(live_chat_id):
 
             # Print with timestamp
             print(f"[{timestamp}] {author}: {message}")
+    
+    return response
