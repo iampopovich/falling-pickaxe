@@ -46,6 +46,8 @@ def game():
     # Start with a default window size (can be resized)
     WINDOW_WIDTH, WINDOW_HEIGHT = 540, 960  # Half of internal resolution
 
+    BLOCK_SCALE_FACTOR = INTERNAL_WIDTH / 16 / 9;
+
     # Create a resizable window
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption("Resizable Pygame Window")
@@ -55,6 +57,16 @@ def game():
 
     assets_dir = Path(__file__).parent.parent / "src/assets" 
     (texture_atlas, atlas_items) = create_texture_atlas(assets_dir)
+    
+    # Scale the entire texture atlas
+    texture_atlas = pygame.transform.scale(texture_atlas, 
+                                        (texture_atlas.get_width() * BLOCK_SCALE_FACTOR, 
+                                        texture_atlas.get_height() * BLOCK_SCALE_FACTOR))
+
+    for category in atlas_items:
+        for item in atlas_items[category]:
+            x, y, w, h = atlas_items[category][item]
+            atlas_items[category][item] = (x * BLOCK_SCALE_FACTOR, y * BLOCK_SCALE_FACTOR, w * BLOCK_SCALE_FACTOR, h * BLOCK_SCALE_FACTOR)
 
     # Main loop
     running = True
@@ -63,23 +75,29 @@ def game():
             if event.type == pygame.QUIT:  # Close window event
                 running = False
             elif event.type == pygame.VIDEORESIZE:  # Window resize event
-                WINDOW_WIDTH, WINDOW_HEIGHT = event.w, event.h
+                new_width, new_height = event.w, event.h
+
+                # Maintain 9:16 aspect ratio
+                if new_width / 9 > new_height / 16:
+                    new_width = int(new_height * (9 / 16))
+                else:
+                    new_height = int(new_width * (16 / 9))
+
+                WINDOW_WIDTH, WINDOW_HEIGHT = new_width, new_height
                 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
+
 
         # Fill internal surface with a color (e.g., dark gray)
         internal_surface.fill((30, 30, 30))
+
+        # Draw the scaled atlas
+        internal_surface.blit(texture_atlas, (0, 0), atlas_items["item"]["golden_pickaxe"])
 
         # Scale internal surface to fit the resized window
         scaled_surface = pygame.transform.smoothscale(internal_surface, (WINDOW_WIDTH, WINDOW_HEIGHT))
         
         # Draw scaled surface onto the actual screen
         screen.blit(scaled_surface, (0, 0))
-       
-        # Extract the texture from the atlas
-        # texture = texture_atlas.subsurface(atlas_items["item"]["diamond_pickaxe"])
-
-        # Draw the scaled texture
-        screen.blit(texture_atlas, (0, 0))
         # Update the display
         pygame.display.flip()
 
