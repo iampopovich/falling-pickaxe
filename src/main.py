@@ -52,7 +52,10 @@ def game():
 
     # Create a resizable window
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
-    pygame.display.set_caption("Resizable Pygame Window")
+    pygame.display.set_caption("Falling Pickaxe")
+    # set icon
+    icon = pygame.image.load(Path(__file__).parent.parent / "src/assets/item" / "diamond_pickaxe.png")
+    pygame.display.set_icon(icon)
 
     # Create an internal surface with fixed resolution
     internal_surface = pygame.Surface((INTERNAL_WIDTH, INTERNAL_HEIGHT))
