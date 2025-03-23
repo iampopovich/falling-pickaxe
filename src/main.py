@@ -4,6 +4,7 @@ from atlas import create_texture_atlas
 import time
 import pygame
 from pathlib import Path
+from chunk import get_block, CHUNK_HEIGHT, CHUNK_WIDTH
 
 print("Fetching live streams...")
 live_stream = None
@@ -45,7 +46,9 @@ def game():
 
     # Start with a default window size (can be resized)
     WINDOW_WIDTH, WINDOW_HEIGHT = 540, 960  # Half of internal resolution
-    BLOCK_SCALE_FACTOR = INTERNAL_WIDTH / 16 / 9;
+    BLOCK_TEXTURE_SIZE = 16
+    BLOCK_SCALE_FACTOR = INTERNAL_WIDTH / BLOCK_TEXTURE_SIZE / CHUNK_WIDTH;
+    BLOCK_SIZE = int(INTERNAL_WIDTH / CHUNK_WIDTH);
 
     # Create a resizable window
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
@@ -80,6 +83,7 @@ def game():
     # Main loop
     running = True
     while running:
+        # ++++++++++++++++++  EVENTS ++++++++++++++++++ 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:  # Close window event
                 running = False
@@ -95,17 +99,34 @@ def game():
                 WINDOW_WIDTH, WINDOW_HEIGHT = new_width, new_height
                 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
 
+        # ++++++++++++++++++  UPDATE ++++++++++++++++++
+        # Determine which chunks are visible
+        start_chunk_y = player_y // (CHUNK_HEIGHT * BLOCK_SIZE)
+        end_chunk_y = (player_y + INTERNAL_HEIGHT) // (CHUNK_HEIGHT * BLOCK_SIZE)
+
+        # ++++++++++++++++++  DRAWING ++++++++++++++++++
         # Fill internal surface with the background
         internal_surface.blit(background_image, ((INTERNAL_WIDTH - background_width) // 2, (INTERNAL_HEIGHT - background_height) // 2))
 
         # Draw the scaled atlas
-        internal_surface.blit(texture_atlas, (0, 0), atlas_items["item"]["golden_pickaxe"])
+        # internal_surface.blit(texture_atlas, (0, 0), atlas_items["item"]["golden_pickaxe"])
+
+        for chunk_y in range(start_chunk_y, end_chunk_y + 1):
+            for chunk_x in range(-1, 2):  # Load chunks around the player horizontally
+                for y in range(CHUNK_HEIGHT):
+                    for x in range(CHUNK_WIDTH):
+                        block_type = get_block(chunk_x, chunk_y, x, y)
+                        if block_type == "":
+                            continue
+                        block_x = (chunk_x * CHUNK_WIDTH + x) * BLOCK_SIZE
+                        block_y = (chunk_y * CHUNK_HEIGHT + y) * BLOCK_SIZE - player_y
+                        block_texture = atlas_items["block"][block_type]
+                        internal_surface.blit(texture_atlas, (block_x, block_y), block_texture)
 
         # Scale internal surface to fit the resized window
         scaled_surface = pygame.transform.smoothscale(internal_surface, (WINDOW_WIDTH, WINDOW_HEIGHT))
-        
-        # Draw scaled surface onto the actual screen
         screen.blit(scaled_surface, (0, 0))
+
         # Update the display
         pygame.display.flip()
 
