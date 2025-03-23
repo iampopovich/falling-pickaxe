@@ -39,13 +39,12 @@ live_chat_id = get_live_chat_id(live_stream["id"])
 def game():
     # Initialize pygame
     pygame.init()
-
+    clock = pygame.time.Clock()
     # Internal resolution (fixed size)
     INTERNAL_WIDTH, INTERNAL_HEIGHT = 1080, 1920
 
     # Start with a default window size (can be resized)
     WINDOW_WIDTH, WINDOW_HEIGHT = 540, 960  # Half of internal resolution
-
     BLOCK_SCALE_FACTOR = INTERNAL_WIDTH / 16 / 9;
 
     # Create a resizable window
@@ -55,9 +54,19 @@ def game():
     # Create an internal surface with fixed resolution
     internal_surface = pygame.Surface((INTERNAL_WIDTH, INTERNAL_HEIGHT))
 
+    # Player position (starting at the middle)
+    player_x, player_y = 0, 0
+
     assets_dir = Path(__file__).parent.parent / "src/assets" 
     (texture_atlas, atlas_items) = create_texture_atlas(assets_dir)
     
+    # Load background 
+    background_image = pygame.image.load(assets_dir / "background.png")
+    background_scale_factor = 1.5  
+    background_width = int(background_image.get_width() * background_scale_factor)
+    background_height = int(background_image.get_height() * background_scale_factor)
+    background_image = pygame.transform.scale(background_image, (background_width, background_height))
+
     # Scale the entire texture atlas
     texture_atlas = pygame.transform.scale(texture_atlas, 
                                         (texture_atlas.get_width() * BLOCK_SCALE_FACTOR, 
@@ -86,9 +95,8 @@ def game():
                 WINDOW_WIDTH, WINDOW_HEIGHT = new_width, new_height
                 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
 
-
-        # Fill internal surface with a color (e.g., dark gray)
-        internal_surface.fill((30, 30, 30))
+        # Fill internal surface with the background
+        internal_surface.blit(background_image, ((INTERNAL_WIDTH - background_width) // 2, (INTERNAL_HEIGHT - background_height) // 2))
 
         # Draw the scaled atlas
         internal_surface.blit(texture_atlas, (0, 0), atlas_items["item"]["golden_pickaxe"])
@@ -105,3 +113,22 @@ def game():
     pygame.quit()
 
 game()
+
+
+# define a block 
+# define a pickaxe
+# define tnt 
+# place blocks 
+
+# add gravity to pickaxe and tnt
+# add bounciness to pickaxe and tnt
+# add explosion to tnt 
+# add sounds 
+
+# add hitboxes 
+# pickaxe can break blocks
+# tnt can break blocks by exploding 
+
+# connect chat to game 
+
+# item counts 
