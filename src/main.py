@@ -1,13 +1,15 @@
+import time
+import pygame
+import pymunk
+import pymunk.pygame_util   
 from youtube import get_live_streams, get_live_stream, get_new_live_chat_messages, get_live_chat_id
 from config import config
 from atlas import create_texture_atlas 
-import time
-import pygame
 from pathlib import Path
 from chunk import get_block, clean_chunks
 from constants import BLOCK_SCALE_FACTOR, BLOCK_SIZE, CHUNK_HEIGHT, CHUNK_WIDTH, INTERNAL_HEIGHT, INTERNAL_WIDTH
-import pymunk
-import pymunk.pygame_util   
+from pickaxe import Pickaxe
+from camera import Camera
 
 print("Fetching live streams...")
 live_stream = None
@@ -63,9 +65,7 @@ def game():
     # Create an internal surface with fixed resolution
     internal_surface = pygame.Surface((INTERNAL_WIDTH, INTERNAL_HEIGHT))
 
-    # Player position (starting at the middle)
-    player_x, player_y = 0, 0
-
+    # Load texture atlas
     assets_dir = Path(__file__).parent.parent / "src/assets" 
     (texture_atlas, atlas_items) = create_texture_atlas(assets_dir)
     
@@ -85,6 +85,12 @@ def game():
         for item in atlas_items[category]:
             x, y, w, h = atlas_items[category][item]
             atlas_items[category][item] = (x * BLOCK_SCALE_FACTOR, y * BLOCK_SCALE_FACTOR, w * BLOCK_SCALE_FACTOR, h * BLOCK_SCALE_FACTOR)
+
+    # Pickaxe
+    pickaxe = Pickaxe(INTERNAL_WIDTH // 2, INTERNAL_HEIGHT // 2, texture_atlas.subsurface(atlas_items["item"]["diamond_pickaxe"]))
+
+    # Camera
+    camera = Camera()
 
     # Main loop
     running = True
@@ -108,12 +114,21 @@ def game():
         # ++++++++++++++++++  UPDATE ++++++++++++++++++
         # Determine which chunks are visible
         # Update physics
-            space.step(1 / 60.0)  # Run physics at 60 FPS
+        space.step(1 / 60.0)  # Run physics at 30 FPS
 
-        start_chunk_y = player_y // (CHUNK_HEIGHT * BLOCK_SIZE) - 1
-        end_chunk_y = (player_y + INTERNAL_HEIGHT) // (CHUNK_HEIGHT * BLOCK_SIZE) 
+        start_chunk_y = int(pickaxe.x // (CHUNK_HEIGHT * BLOCK_SIZE) - 1)
+        end_chunk_y = int(pickaxe.y + INTERNAL_HEIGHT) // (CHUNK_HEIGHT * BLOCK_SIZE) 
+
+        # Update pickaxe
+        pickaxe.update()
+
+        # Update camera
+        camera.update(pickaxe.y)
 
         # ++++++++++++++++++  DRAWING ++++++++++++++++++
+        # Clear the internal surface
+        screen.fill((0, 0, 0))
+
         # Fill internal surface with the background
         internal_surface.blit(background_image, ((INTERNAL_WIDTH - background_width) // 2, (INTERNAL_HEIGHT - background_height) // 2))
 
@@ -130,12 +145,10 @@ def game():
                     block = get_block(0, chunk_y, x, y, texture_atlas, atlas_items, space)
                     if block == None:
                         continue
+                    block.draw(internal_surface, camera)
 
-                    block.draw(internal_surface)
-
-                    # block_x = (0 * CHUNK_WIDTH + x) * BLOCK_SIZE
-                    # block_y = (chunk_y * CHUNK_HEIGHT + y) * BLOCK_SIZE - player_y
-                    # internal_surface.blit(texture_atlas, (block_x, block_y), block_texture)
+        # Draw pickaxe
+        pickaxe.draw(internal_surface, camera)
 
         # Scale internal surface to fit the resized window
         scaled_surface = pygame.transform.smoothscale(internal_surface, (WINDOW_WIDTH, WINDOW_HEIGHT))

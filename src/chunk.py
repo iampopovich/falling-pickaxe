@@ -69,3 +69,4 @@ def clean_chunks(start_chunk_y):
     for (chunk_x, chunk_y) in list(chunks.keys()):
         if chunk_y < start_chunk_y:
             del chunks[(chunk_x, chunk_y)]
+            print("Deleted chunk", chunk_x, chunk_y)

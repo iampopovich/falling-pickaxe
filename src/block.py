@@ -33,7 +33,10 @@ class Block:
             return True  # Block should be destroyed
         return False
 
-    def draw(self, screen):
+    def draw(self, screen, camera):
         """Draw block at its position"""
-        rect = self.texture.get_rect(center=self.body.position)
-        screen.blit(self.texture, self.body.position)
+        block_x = self.body.position.x
+        block_y = self.body.position.y - camera.offset_y
+
+        screen.blit(self.texture, (block_x, block_y))
+

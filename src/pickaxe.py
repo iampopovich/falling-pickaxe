@@ -1,29 +1,41 @@
 import pygame
-import pymunk
-import pymunk.pygame_util
+import math
 
 class Pickaxe:
-    def __init__(self, space, x, y, texture):
+    def __init__(self, x, y, texture, velocity=0, gravity=0.5, rotation=0):
+        self.x = x
+        self.y = y
         self.texture = texture
-        width, height = self.texture.get_size()
+        self.velocity = velocity
+        self.gravity = gravity
+        self.rotation = rotation
+        self.angular_velocity = 0  # Rotation speed
+        self.hitbox = self.get_hitbox()
+        self.terminal_velocity = 100  # Maximum falling speed
 
-        # Create physics body
-        self.body = pymunk.Body()
-        self.body.position = (x, y)
-
-        # Create shape (hitbox) based on texture size
-        self.shape = pymunk.Poly.create_box(self.body, (width, height))
-        self.shape.density = 1  # Affects gravity
-        self.shape.elasticity = 0.5  # Bounciness
-        space.add(self.body, self.shape)  # Add to physics world
+    def get_hitbox(self):
+        """Return a rotated hitbox using the pickaxe shape."""
+        rotated_image = pygame.transform.rotate(self.texture, self.rotation)
+        return rotated_image.get_rect(center=(self.x, self.y))
 
     def update(self):
-        """ Update pickaxe physics (handled by pymunk) """
-        pass  # Pymunk automatically updates the physics
+        """Apply gravity, update movement, check collisions, and rotate."""
+        self.velocity += self.gravity  # Gravity affects velocity
+        self.y += self.velocity  # Apply velocity to position
+        self.rotation += self.angular_velocity  # Apply angular velocity
+        self.hitbox = self.get_hitbox()  # Update hitbox
 
-    def draw(self, screen):
-        """ Draw rotated pickaxe at physics body's position """
-        angle = -self.body.angle * 57.2958  # Convert radians to degrees
-        rotated_image = pygame.transform.rotate(self.texture, angle)
-        rect = rotated_image.get_rect(center=self.body.position)
-        screen.blit(rotated_image, rect.topleft)
+        if (self.velocity > self.terminal_velocity):
+            self.velocity = self.terminal_velocity
+
+    def draw(self, screen, camera):
+        """Draw the rotated pickaxe at its current position."""
+        rotated_image = pygame.transform.rotate(self.texture, self.rotation)
+        rect = rotated_image.get_rect(center=(self.x, self.y))
+        rect.y -= camera.offset_y
+        screen.blit(rotated_image, rect)
+
+        # Adjust hitbox position for camera before drawing
+        adjusted_hitbox = self.hitbox.copy()
+        adjusted_hitbox.y -= camera.offset_y  
+        pygame.draw.rect(screen, (255, 0, 0), adjusted_hitbox, 2)  # Draw adjusted hitbox
