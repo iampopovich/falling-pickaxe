@@ -4,7 +4,7 @@ from atlas import create_texture_atlas
 import time
 import pygame
 from pathlib import Path
-from chunk import get_block, CHUNK_HEIGHT, CHUNK_WIDTH
+from chunk import get_block, clean_chunks, CHUNK_HEIGHT, CHUNK_WIDTH
 
 print("Fetching live streams...")
 live_stream = None
@@ -113,18 +113,21 @@ def game():
 
         # Draw the scaled atlas
         # internal_surface.blit(texture_atlas, (0, 0), atlas_items["item"]["golden_pickaxe"])
+        
+        # Delete chunks 
+        clean_chunks(start_chunk_y)
 
+        # Draw blocks in visible chunks
         for chunk_y in range(start_chunk_y, end_chunk_y + 1):
-            for chunk_x in range(-1, 2):  # Load chunks around the player horizontally
-                for y in range(CHUNK_HEIGHT):
-                    for x in range(CHUNK_WIDTH):
-                        block_type = get_block(chunk_x, chunk_y, x, y)
-                        if block_type == "":
-                            continue
-                        block_x = (chunk_x * CHUNK_WIDTH + x) * BLOCK_SIZE
-                        block_y = (chunk_y * CHUNK_HEIGHT + y) * BLOCK_SIZE - player_y
-                        block_texture = atlas_items["block"][block_type]
-                        internal_surface.blit(texture_atlas, (block_x, block_y), block_texture)
+            for y in range(CHUNK_HEIGHT):
+                for x in range(CHUNK_WIDTH):
+                    block_type = get_block(0, chunk_y, x, y)
+                    if block_type == "":
+                        continue
+                    block_x = (0 * CHUNK_WIDTH + x) * BLOCK_SIZE
+                    block_y = (chunk_y * CHUNK_HEIGHT + y) * BLOCK_SIZE - player_y
+                    block_texture = atlas_items["block"][block_type]
+                    internal_surface.blit(texture_atlas, (block_x, block_y), block_texture)
 
         # Scale internal surface to fit the resized window
         scaled_surface = pygame.transform.smoothscale(internal_surface, (WINDOW_WIDTH, WINDOW_HEIGHT))

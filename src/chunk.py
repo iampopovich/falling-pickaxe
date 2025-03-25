@@ -30,6 +30,9 @@ def generate_empty_chunk():
 
 # Function to generate chunks using Perlin noise
 def generate_chunk(chunk_x, chunk_y):
+    if(chunk_x % 10 == 0 and chunk_y % 10 == 0):
+        return generate_empty_chunk()
+
     chunk = []
     for y in range(CHUNK_HEIGHT):
         row = []
@@ -59,6 +62,11 @@ chunks = {}
 
 def get_block(chunk_x, chunk_y, x, y):
     if (chunk_x, chunk_y) not in chunks:
-        chunks[(chunk_x, chunk_y)] = generate_empty_chunk()
+        chunks[(chunk_x, chunk_y)] = generate_chunk(chunk_x, chunk_y)
 
     return chunks[(chunk_x, chunk_y)][y][x]
+
+def clean_chunks(start_chunk_y):
+    for (chunk_x, chunk_y) in list(chunks.keys()):
+        if chunk_y < start_chunk_y:
+            del chunks[(chunk_x, chunk_y)]
