@@ -4,7 +4,10 @@ from atlas import create_texture_atlas
 import time
 import pygame
 from pathlib import Path
-from chunk import get_block, clean_chunks, CHUNK_HEIGHT, CHUNK_WIDTH
+from chunk import get_block, clean_chunks
+from constants import BLOCK_SCALE_FACTOR, BLOCK_SIZE, CHUNK_HEIGHT, CHUNK_WIDTH, INTERNAL_HEIGHT, INTERNAL_WIDTH
+import pymunk
+import pymunk.pygame_util   
 
 print("Fetching live streams...")
 live_stream = None
@@ -37,18 +40,18 @@ live_chat_id = get_live_chat_id(live_stream["id"])
 #     time.sleep(config["CHAT_UPDATE_INTERVAL_SECONDS"])
 
 # Initialize texture atlas
+
+
 def game():
+    WINDOW_WIDTH, WINDOW_HEIGHT = 540, 960  # Half of internal resolution
+    
     # Initialize pygame
     pygame.init()
     clock = pygame.time.Clock()
-    # Internal resolution (fixed size)
-    INTERNAL_WIDTH, INTERNAL_HEIGHT = 1080, 1920
 
-    # Start with a default window size (can be resized)
-    WINDOW_WIDTH, WINDOW_HEIGHT = 540, 960  # Half of internal resolution
-    BLOCK_TEXTURE_SIZE = 16
-    BLOCK_SCALE_FACTOR = INTERNAL_WIDTH / BLOCK_TEXTURE_SIZE / CHUNK_WIDTH;
-    BLOCK_SIZE = int(INTERNAL_WIDTH / CHUNK_WIDTH);
+    # Pymunk physics 
+    space = pymunk.Space()
+    space.gravity = (0, 1000)  # (x, y) - down is positive y
 
     # Create a resizable window
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
@@ -104,8 +107,11 @@ def game():
 
         # ++++++++++++++++++  UPDATE ++++++++++++++++++
         # Determine which chunks are visible
-        start_chunk_y = player_y // (CHUNK_HEIGHT * BLOCK_SIZE)
-        end_chunk_y = (player_y + INTERNAL_HEIGHT) // (CHUNK_HEIGHT * BLOCK_SIZE)
+        # Update physics
+            space.step(1 / 60.0)  # Run physics at 60 FPS
+
+        start_chunk_y = player_y // (CHUNK_HEIGHT * BLOCK_SIZE) - 1
+        end_chunk_y = (player_y + INTERNAL_HEIGHT) // (CHUNK_HEIGHT * BLOCK_SIZE) 
 
         # ++++++++++++++++++  DRAWING ++++++++++++++++++
         # Fill internal surface with the background
@@ -121,13 +127,15 @@ def game():
         for chunk_y in range(start_chunk_y, end_chunk_y + 1):
             for y in range(CHUNK_HEIGHT):
                 for x in range(CHUNK_WIDTH):
-                    block_type = get_block(0, chunk_y, x, y)
-                    if block_type == "":
+                    block = get_block(0, chunk_y, x, y, texture_atlas, atlas_items, space)
+                    if block == None:
                         continue
-                    block_x = (0 * CHUNK_WIDTH + x) * BLOCK_SIZE
-                    block_y = (chunk_y * CHUNK_HEIGHT + y) * BLOCK_SIZE - player_y
-                    block_texture = atlas_items["block"][block_type]
-                    internal_surface.blit(texture_atlas, (block_x, block_y), block_texture)
+
+                    block.draw(internal_surface)
+
+                    # block_x = (0 * CHUNK_WIDTH + x) * BLOCK_SIZE
+                    # block_y = (chunk_y * CHUNK_HEIGHT + y) * BLOCK_SIZE - player_y
+                    # internal_surface.blit(texture_atlas, (block_x, block_y), block_texture)
 
         # Scale internal surface to fit the resized window
         scaled_surface = pygame.transform.smoothscale(internal_surface, (WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -135,7 +143,7 @@ def game():
 
         # Update the display
         pygame.display.flip()
-
+        clock.tick(60)  # Cap the frame rate
     # Quit pygame properly
     pygame.quit()
 
