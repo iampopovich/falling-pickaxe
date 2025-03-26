@@ -6,32 +6,32 @@ from youtube import get_live_streams, get_live_stream, get_new_live_chat_message
 from config import config
 from atlas import create_texture_atlas 
 from pathlib import Path
-from chunk import get_block, clean_chunks
+from chunk import get_block, clean_chunks, delete_block
 from constants import BLOCK_SCALE_FACTOR, BLOCK_SIZE, CHUNK_HEIGHT, CHUNK_WIDTH, INTERNAL_HEIGHT, INTERNAL_WIDTH
 from pickaxe import Pickaxe
 from camera import Camera
 
-print("Fetching live streams...")
-live_stream = None
+# print("Fetching live streams...")
+# live_stream = None
 
-# Fetch live streams
-print("Checking for specific live stream")
-if config["LIVESTREAM_ID"] is not None and config["LIVESTREAM_ID"] != "":
-    live_stream = get_live_stream(config["LIVESTREAM_ID"])
+# # Fetch live streams
+# print("Checking for specific live stream")
+# if config["LIVESTREAM_ID"] is not None and config["LIVESTREAM_ID"] != "":
+#     live_stream = get_live_stream(config["LIVESTREAM_ID"])
 
-if live_stream is None:
-    print("No live stream found from config. Fetching all live streams instead...")
-    live_videos = get_live_streams(config["CHANNEL_ID"])
-    live_stream = get_live_stream(live_videos[0]["video_id"])
+# if live_stream is None:
+#     print("No live stream found from config. Fetching all live streams instead...")
+#     live_videos = get_live_streams(config["CHANNEL_ID"])
+#     live_stream = get_live_stream(live_videos[0]["video_id"])
 
-# Print live stream information
-if live_stream is not None:
-    print(f"Live stream found: {live_stream["snippet"]['title']} | Link: https://www.youtube.com/watch?v={live_stream["id"]}")
-else:
-    print("No live streams found.")
+# # Print live stream information
+# if live_stream is not None:
+#     print(f"Live stream found: {live_stream["snippet"]['title']} | Link: https://www.youtube.com/watch?v={live_stream["id"]}")
+# else:
+#     print("No live streams found.")
 
-# get chat id from live stream
-live_chat_id = get_live_chat_id(live_stream["id"])
+# # get chat id from live stream
+# live_chat_id = get_live_chat_id(live_stream["id"])
 
 # Fetch live chat messages
 # print("Fetching live chat messages...")
@@ -87,7 +87,7 @@ def game():
             atlas_items[category][item] = (x * BLOCK_SCALE_FACTOR, y * BLOCK_SCALE_FACTOR, w * BLOCK_SCALE_FACTOR, h * BLOCK_SCALE_FACTOR)
 
     # Pickaxe
-    pickaxe = Pickaxe(INTERNAL_WIDTH // 2, INTERNAL_HEIGHT // 2, texture_atlas.subsurface(atlas_items["item"]["diamond_pickaxe"]))
+    pickaxe = Pickaxe(space, INTERNAL_WIDTH // 2, INTERNAL_HEIGHT // 2, texture_atlas.subsurface(atlas_items["item"]["diamond_pickaxe"]))
 
     # Camera
     camera = Camera()
@@ -114,16 +114,16 @@ def game():
         # ++++++++++++++++++  UPDATE ++++++++++++++++++
         # Determine which chunks are visible
         # Update physics
-        space.step(1 / 60.0)  # Run physics at 30 FPS
+        space.step(1 / 60.0) 
 
-        start_chunk_y = int(pickaxe.x // (CHUNK_HEIGHT * BLOCK_SIZE) - 1)
-        end_chunk_y = int(pickaxe.y + INTERNAL_HEIGHT) // (CHUNK_HEIGHT * BLOCK_SIZE) 
+        start_chunk_y = int(pickaxe.body.position.y // (CHUNK_HEIGHT * BLOCK_SIZE) - 1)
+        end_chunk_y = int(pickaxe.body.position.x + INTERNAL_HEIGHT) // (CHUNK_HEIGHT * BLOCK_SIZE) 
 
         # Update pickaxe
         pickaxe.update()
 
         # Update camera
-        camera.update(pickaxe.y)
+        camera.update(pickaxe.body.position.y)
 
         # ++++++++++++++++++  DRAWING ++++++++++++++++++
         # Clear the internal surface
