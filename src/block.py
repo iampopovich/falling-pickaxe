@@ -46,9 +46,3 @@ class Block:
 
         screen.blit(self.texture, (block_x, block_y))
 
-        # Draw the polygon hitbox for better representation
-        vertices = self.shape.get_vertices()
-        vertices = [(v.x + self.body.position.x, v.y + self.body.position.y - camera.offset_y) for v in vertices]
-        pygame.draw.polygon(screen, (255, 0, 0), vertices, 2)
-
-

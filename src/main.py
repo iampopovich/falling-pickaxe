@@ -117,7 +117,7 @@ def game():
         space.step(1 / 60.0) 
 
         start_chunk_y = int(pickaxe.body.position.y // (CHUNK_HEIGHT * BLOCK_SIZE) - 1)
-        end_chunk_y = int(pickaxe.body.position.x + INTERNAL_HEIGHT) // (CHUNK_HEIGHT * BLOCK_SIZE) 
+        end_chunk_y = int(pickaxe.body.position.y + INTERNAL_HEIGHT) // (CHUNK_HEIGHT * BLOCK_SIZE)  + 1
 
         # Update pickaxe
         pickaxe.update()
@@ -139,7 +139,7 @@ def game():
         clean_chunks(start_chunk_y)
 
         # Draw blocks in visible chunks
-        for chunk_y in range(start_chunk_y, end_chunk_y + 1):
+        for chunk_y in range(start_chunk_y, end_chunk_y):
             for y in range(CHUNK_HEIGHT):
                 for x in range(CHUNK_WIDTH):
                     block = get_block(0, chunk_y, x, y, texture_atlas, atlas_items, space)

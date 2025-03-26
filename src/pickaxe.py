@@ -86,7 +86,6 @@ class Pickaxe:
         block = block_shape.block_ref  # Get the actual block instance
 
         block.hp -= self.damage  # Reduce HP when hit
-        print("Hit block", block.hp)
         if block.hp <= 0:
             block.destroyed = True
             space.remove(block.body, block.shape)  # Remove from physics world
@@ -108,23 +107,3 @@ class Pickaxe:
         rect = rotated_image.get_rect(center=(self.body.position.x, self.body.position.y))
         rect.y -= camera.offset_y
         screen.blit(rotated_image, rect)
-
-
-        for shape in self.shapes:
-        # Draw the polygon hitbox for better representation
-            vertices = shape.get_vertices()
-            # Rotate and offset each vertex
-            rotated_vertices = []
-            for vertex in vertices:
-                # Rotate each vertex based on the body's angle
-                rotated_x, rotated_y = rotate_point(vertex[0], vertex[1], self.body.angle)
-
-                # Offset each rotated vertex by the body's position
-                rotated_vertices.append((rotated_x + self.body.position.x, rotated_y + self.body.position.y - camera.offset_y))
-
-            # Draw the polygon hitbox for better representation
-            pygame.draw.polygon(screen, (255, 0, 0), rotated_vertices, 2)  # Draw the hitbox outline
-
-        # # Optionally, draw the mask (pixel-perfect collision)
-        # mask_surface = self.mask.to_surface(setcolor=(255, 0, 0), unsetcolor=(0, 0, 0, 0))
-        # screen.blit(mask_surface, rect)

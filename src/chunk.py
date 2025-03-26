@@ -40,7 +40,7 @@ def generate_chunk(chunk_x, chunk_y, texture_atlas, atlas_items, space):
                 (chunk_y * CHUNK_HEIGHT + y) * 0.1,  # Vertical variation
                 octaves=4, persistence=0.5, lacunarity=2.0, repeatx=9999, repeaty=9999, base=SEED
             )
-            
+
             # Block selection based on noise value
             if noise_value < -0.2:
                 row.append(Block(space, block_x, block_y, "stone", texture_atlas,atlas_items))
