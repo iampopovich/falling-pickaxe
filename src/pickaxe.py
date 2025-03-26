@@ -27,11 +27,12 @@ def rotate_vertices(vertices, angle):
         return rotated_vertices
 
 class Pickaxe:
-    def __init__(self, space, x, y, texture, velocity=0, rotation=0, mass=100):
+    def __init__(self, space, x, y, texture, damage=10, velocity=0, rotation=0, mass=100):
         self.texture = texture
         self.velocity = velocity
         self.rotation = rotation
         self.space = space
+        self.damage = damage
 
         vertices = rotate_vertices([
                     (0, 0), # A
@@ -70,9 +71,25 @@ class Pickaxe:
             shape = pymunk.Poly(self.body, vertices)
             shape.elasticity = 0.7
             shape.friction = 0.7
+            shape.collision_type = 1  # Identifier for collisions
             self.shapes.append(shape)
 
         self.space.add(self.body, *self.shapes)
+
+        # Add collision handler for pickaxe & blocks
+        handler = space.add_collision_handler(1, 2)  # (Pickaxe type, Block type)
+        handler.post_solve = self.on_collision
+
+    def on_collision(self, arbiter, space, data):
+        """Handles collision with blocks: Reduce HP or destroy the block."""
+        block_shape = arbiter.shapes[1]  # Get the block shape
+        block = block_shape.block_ref  # Get the actual block instance
+
+        block.hp -= self.damage  # Reduce HP when hit
+        print("Hit block", block.hp)
+        if block.hp <= 0:
+            block.destroyed = True
+            space.remove(block.body, block.shape)  # Remove from physics world
 
     def update(self):
         """Apply gravity, update movement, check collisions, and rotate."""
