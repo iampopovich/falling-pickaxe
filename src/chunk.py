@@ -77,7 +77,7 @@ def generate_first_chunk(texture_atlas, atlas_items, space):
             elif y == CHUNK_HEIGHT - 2:
                 block_x = (0 * CHUNK_WIDTH + x) * BLOCK_SIZE
                 block_y = (0 * CHUNK_HEIGHT + y) * BLOCK_SIZE
-                row.append(Block(space, block_x, block_y, "grass_block_side", texture_atlas, atlas_items))
+                row.append(Block(space, block_x, block_y, "grass_block", texture_atlas, atlas_items))
                 continue
             elif y == CHUNK_HEIGHT - 1:
                 block_x = (0 * CHUNK_WIDTH + x) * BLOCK_SIZE
