@@ -99,16 +99,15 @@ class Pickaxe:
             self.sound_manager.play_sound("grass" + str(random.randint(1, 4)))
         else:
             self.sound_manager.play_sound("stone" + str(random.randint(1, 4)))
+
+        # Add small random rotation on hit
+        self.body.angle += random.choice([0.01, -0.01])
         
     def update(self):
         """Apply gravity, update movement, check collisions, and rotate."""
         # Manually limit the falling speed (terminal velocity)
         if self.body.velocity.y > 1000:
             self.body.velocity = (self.body.velocity.x, 1000)
-
-        # Add a bit of random rotation on hit 
-        #if(self.body.velocity.y == 0):
-        #    self.body.angle += random.choice([0.01, -0.01])
 
 
     def draw(self, screen, camera):

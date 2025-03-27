@@ -11,6 +11,7 @@ from constants import BLOCK_SCALE_FACTOR, BLOCK_SIZE, CHUNK_HEIGHT, CHUNK_WIDTH,
 from pickaxe import Pickaxe
 from camera import Camera
 from sound import SoundManager
+from tnt import Tnt
 
 # print("Fetching live streams...")
 # live_stream = None
@@ -90,7 +91,7 @@ def game():
     #sounds 
     sound_manager = SoundManager()
 
-    sound_manager.load_sound("tnt", assets_dir / "sounds" / "tnt.mp3", config["SOUND_VOLUME"], 0.3)
+    sound_manager.load_sound("tnt", assets_dir / "sounds" / "tnt.mp3", 0.3)
     sound_manager.load_sound("stone1", assets_dir / "sounds" / "stone1.wav", 0.5)
     sound_manager.load_sound("stone2", assets_dir / "sounds" / "stone2.wav", 0.5)
     sound_manager.load_sound("stone3", assets_dir / "sounds" / "stone3.wav", 0.5)
@@ -102,6 +103,11 @@ def game():
 
     # Pickaxe
     pickaxe = Pickaxe(space, INTERNAL_WIDTH // 2, INTERNAL_HEIGHT // 2, texture_atlas.subsurface(atlas_items["item"]["diamond_pickaxe"]), sound_manager)
+
+    # TNT
+    last_tnt_spawn = pygame.time.get_ticks()
+    tnt_spawn_interval = 1000 * config["TNT_SPAWN_INTERVAL_SECONDS"]  # 10 seconds in milliseconds
+    tnt_list = []  # List to keep track of spawned TNT objects
 
     # Camera
     camera = Camera()
@@ -146,8 +152,17 @@ def game():
         # Fill internal surface with the background
         internal_surface.blit(background_image, ((INTERNAL_WIDTH - background_width) // 2, (INTERNAL_HEIGHT - background_height) // 2))
 
-        # Draw the scaled atlas
-        # internal_surface.blit(texture_atlas, (0, 0), atlas_items["item"]["golden_pickaxe"])
+        # Check if it's time to spawn a new TNT
+        current_time = pygame.time.get_ticks()
+        if current_time - last_tnt_spawn >= tnt_spawn_interval:
+            # Example: spawn TNT at position (400, 300) with a given texture
+            new_tnt = Tnt(space, pickaxe.body.position.x, pickaxe.body.position.y - 100, texture_atlas, atlas_items, sound_manager)
+            tnt_list.append(new_tnt)
+            last_tnt_spawn = current_time
+
+        # Update and draw all TNT objects
+        for tnt in tnt_list:
+            tnt.update()
         
         # Delete chunks 
         clean_chunks(start_chunk_y)
@@ -164,6 +179,10 @@ def game():
 
         # Draw pickaxe
         pickaxe.draw(internal_surface, camera)
+
+        # Draw TNT
+        for tnt in tnt_list:
+            tnt.draw(internal_surface, camera)
 
         # Scale internal surface to fit the resized window
         scaled_surface = pygame.transform.smoothscale(internal_surface, (WINDOW_WIDTH, WINDOW_HEIGHT))

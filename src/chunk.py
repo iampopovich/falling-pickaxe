@@ -123,6 +123,7 @@ def get_block(chunk_x, chunk_y, x, y, texture_atlas, atlas_items, space):
 
 def delete_block(chunk_x, chunk_y, x, y):
     if (chunk_x, chunk_y) in chunks:
+        del chunks[(chunk_x, chunk_y)][y][x]
         chunks[(chunk_x, chunk_y)][y][x] = None
 
 def clean_chunks(start_chunk_y):
