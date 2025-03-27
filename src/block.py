@@ -4,16 +4,57 @@ from constants import BLOCK_SIZE
 
 class Block:
     def __init__(self, space, x, y, name, texture_atlas, atlas_items):
-        if(name == "bedrock"):
+        if name == "bedrock":
+            self.max_hp = 1000000000
             self.hp = 1000000000
-        elif(name == "stone"):
-            self.hp = 50
-        elif(name == "dirt"):
-            self.hp = 1
-        elif(name == "cobblestone"):
-            self.hp = 30
+        elif name == "stone":
+            self.max_hp = 10
+            self.hp = 10
+        elif name == "andesite":
+            self.hp = 10
+            self.max_hp = 10
+        elif name == "diorite":
+            self.hp = 10
+            self.max_hp = 10
+        elif name == "granite":
+            self.hp = 10
+            self.max_hp = 10
+        elif name == "coal_ore":
+            self.hp = 15
+            self.max_hp = 15
+        elif name == "iron_ore":
+            self.hp = 15
+            self.max_hp = 15
+        elif name == "gold_ore":
+            self.hp = 20
+            self.max_hp = 20
+        elif name == "diamond_ore":
+            self.hp = 20
+            self.max_hp = 20
+        elif name == "emerald_ore":
+            self.hp = 20
+            self.max_hp = 20
+        elif name == "obsidian":
+            self.hp = 100
+            self.max_hp = 100
+        elif name == "redstone_ore":
+            self.hp = 15
+            self.max_hp = 15
+        elif name == "lapis_ore":
+            self.hp = 15
+            self.max_hp = 15
+        elif name == "mossy_cobblestone":
+            self.hp = 12
+            self.max_hp = 12
+        elif name == "cobblestone":
+            self.hp = 22
+            self.max_hp = 22
         else:
             self.hp = 1
+            self.max_hp = 1
+
+        self.texture_atlas = texture_atlas
+        self.atlas_items = atlas_items
 
         rect = atlas_items["block"][name]  
         self.texture = texture_atlas.subsurface(rect)
@@ -46,3 +87,13 @@ class Block:
 
         screen.blit(self.texture, (block_x, block_y))
 
+        # Determine the destroy stage (0-9) based on hp percentage
+        if self.hp < self.max_hp:
+            damage_stage = int((1 - (self.hp / self.max_hp)) * 9)  # Scale hp to 0-9 range
+            damage_stage = min(damage_stage, 9)  # Ensure it doesn't exceed stage_9
+            
+            # Draw the destroy stage overlay
+            destroy_texture = self.texture_atlas.subsurface(
+                self.atlas_items["destroy_stage"][f"destroy_stage_{damage_stage}"]
+            )
+            screen.blit(destroy_texture, (block_x, block_y))
