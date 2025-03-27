@@ -27,7 +27,7 @@ def rotate_vertices(vertices, angle):
         return rotated_vertices
 
 class Pickaxe:
-    def __init__(self, space, x, y, texture, damage=10, velocity=0, rotation=0, mass=100):
+    def __init__(self, space, x, y, texture, sound_manager, damage=10, velocity=0, rotation=0, mass=100):
         self.texture = texture
         self.velocity = velocity
         self.rotation = rotation
@@ -66,6 +66,8 @@ class Pickaxe:
         self.body.position = (x, y)
         self.body.angle = math.radians(rotation)
 
+        self.sound_manager = sound_manager
+
         self.shapes = []
         for vertices in [vertices, vertices2, vertices3]:
             shape = pymunk.Poly(self.body, vertices)
@@ -90,6 +92,9 @@ class Pickaxe:
             block.destroyed = True
             space.remove(block.body, block.shape)  # Remove from physics world
 
+        # play a random stone sound
+        self.sound_manager.play_sound("stone" + str(random.randint(1, 4)))
+        
     def update(self):
         """Apply gravity, update movement, check collisions, and rotate."""
         # Manually limit the falling speed (terminal velocity)

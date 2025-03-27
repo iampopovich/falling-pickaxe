@@ -10,6 +10,7 @@ from chunk import get_block, clean_chunks, delete_block
 from constants import BLOCK_SCALE_FACTOR, BLOCK_SIZE, CHUNK_HEIGHT, CHUNK_WIDTH, INTERNAL_HEIGHT, INTERNAL_WIDTH
 from pickaxe import Pickaxe
 from camera import Camera
+from sound import SoundManager
 
 # print("Fetching live streams...")
 # live_stream = None
@@ -86,8 +87,17 @@ def game():
             x, y, w, h = atlas_items[category][item]
             atlas_items[category][item] = (x * BLOCK_SCALE_FACTOR, y * BLOCK_SCALE_FACTOR, w * BLOCK_SCALE_FACTOR, h * BLOCK_SCALE_FACTOR)
 
+    #sounds 
+    sound_manager = SoundManager()
+
+    sound_manager.load_sound("tnt", assets_dir / "sounds" / "tnt.mp3")
+    sound_manager.load_sound("stone1", assets_dir / "sounds" / "stone1.wav")
+    sound_manager.load_sound("stone2", assets_dir / "sounds" / "stone2.wav")
+    sound_manager.load_sound("stone3", assets_dir / "sounds" / "stone3.wav")
+    sound_manager.load_sound("stone4", assets_dir / "sounds" / "stone4.wav")
+
     # Pickaxe
-    pickaxe = Pickaxe(space, INTERNAL_WIDTH // 2, INTERNAL_HEIGHT // 2, texture_atlas.subsurface(atlas_items["item"]["diamond_pickaxe"]))
+    pickaxe = Pickaxe(space, INTERNAL_WIDTH // 2, INTERNAL_HEIGHT // 2, texture_atlas.subsurface(atlas_items["item"]["diamond_pickaxe"]), sound_manager)
 
     # Camera
     camera = Camera()
