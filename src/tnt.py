@@ -42,8 +42,8 @@ class Tnt:
         handler = space.add_collision_handler(3, 2)  # (Pickaxe type, Block type)
         handler.post_solve = self.on_collision
 
-        # after 4 seconds explode
-        pygame.time.set_timer(pygame.USEREVENT, 4000)
+        self.detonated = False
+        self.spawn_time = pygame.time.get_ticks()
 
     def on_collision(self, arbiter, space, data):
         """Handles collision with blocks: Reduce HP or destroy the block."""
@@ -53,19 +53,33 @@ class Tnt:
 
     def explode(self):
         radius = 5 
-        # delete tnt 
-        # create explosion particles
+        self.detonated = True
         # damage blocks around the tnt 
-        return 
         
-    def update(self):
+        # create explosion particles
+        
+    def update(self, tnt_list):
         """Update TNT physics like gravity and rotation."""
+        if self.detonated:
+            self.space.remove(self.body, self.shape)
+            tnt_list.remove(self)
+            return
+        
         # Limit falling speed (terminal velocity)
         if self.body.velocity.y > 1000:
             self.body.velocity = (self.body.velocity.x, 1000)
 
+        # after 4 seconds, explode
+        current_time = pygame.time.get_ticks()
+        if current_time - self.spawn_time >= 4000:
+            self.explode()
+
     def draw(self, screen, camera):
         """Draw the TNT at its current position with a blinking white overlay that respects rotation."""
+
+        if self.detonated:
+            return
+
         # Rotate the TNT texture and get its rect
         rotated_image = pygame.transform.rotate(self.texture, -math.degrees(self.body.angle))
         rect = rotated_image.get_rect(center=(self.body.position.x, self.body.position.y))

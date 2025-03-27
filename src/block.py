@@ -82,7 +82,7 @@ class Block:
 
         space.add(self.body, self.shape)
 
-    def update(self):
+    def update(self, space):
         """Update block state"""
 
         # Check if the block was hit for the first time
@@ -103,6 +103,10 @@ class Block:
 
                     # Reset the healing timer after each heal
                     self.last_heal_time = current_time
+        
+        if self.hp <= 0 and not self.destroyed:
+            self.destroyed = True
+            space.remove(self.body, self.shape)  # Remove from physics world
 
     def draw(self, screen, camera):
         """Draw block at its position"""

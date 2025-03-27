@@ -162,7 +162,7 @@ def game():
 
         # Update and draw all TNT objects
         for tnt in tnt_list:
-            tnt.update()
+            tnt.update(tnt_list)
         
         # Delete chunks 
         clean_chunks(start_chunk_y)
@@ -172,9 +172,11 @@ def game():
             for y in range(CHUNK_HEIGHT):
                 for x in range(CHUNK_WIDTH):
                     block = get_block(0, chunk_y, x, y, texture_atlas, atlas_items, space)
+                    
                     if block == None:
                         continue
-                    block.update()
+                    
+                    block.update(space)
                     block.draw(internal_surface, camera)
 
         # Draw pickaxe
