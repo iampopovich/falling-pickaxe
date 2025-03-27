@@ -4,6 +4,7 @@ import math
 import random
 from constants import BLOCK_SIZE
 from chunk import chunks
+from explosion import Explosion
 
 class Tnt:
     def __init__(self, space, x, y, texture_atlas, atlas_items, sound_manager, velocity=0, rotation=0, mass=70):
@@ -52,7 +53,7 @@ class Tnt:
         # Add small random rotation on hit
         self.body.angle += random.choice([0.01, -0.01])
 
-    def explode(self):
+    def explode(self, explosions):
         explosion_radius = 3 * BLOCK_SIZE  # Explosion radius in pixels
         self.detonated = True
 
@@ -78,9 +79,10 @@ class Tnt:
                         # or directly reducing block.hp)
                         block.hp -= damage
 
-        # create explosion particles
-        
-    def update(self, tnt_list):
+        explosion = Explosion(self.body.position, self.texture_atlas, self.atlas_items, particle_count=20)
+        explosions.append(explosion)
+
+    def update(self, tnt_list, explosions):
         """Update TNT physics like gravity and rotation."""
         if self.detonated:
             self.space.remove(self.body, self.shape)
@@ -94,7 +96,7 @@ class Tnt:
         # after 4 seconds, explode
         current_time = pygame.time.get_ticks()
         if current_time - self.spawn_time >= 4000:
-            self.explode()
+            self.explode(explosions)
 
     def draw(self, screen, camera):
         """Draw the TNT at its current position with a blinking white overlay that respects rotation."""

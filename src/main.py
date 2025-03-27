@@ -112,6 +112,9 @@ def game():
     # Camera
     camera = Camera()
 
+    # Explosions
+    explosions = []
+
     # Main loop
     running = True
     while running:
@@ -162,7 +165,7 @@ def game():
 
         # Update and draw all TNT objects
         for tnt in tnt_list:
-            tnt.update(tnt_list)
+            tnt.update(tnt_list, explosions)
         
         # Delete chunks 
         clean_chunks(start_chunk_y)
@@ -186,13 +189,21 @@ def game():
         for tnt in tnt_list:
             tnt.draw(internal_surface, camera)
 
+        # Draw particles
+        for explosion in explosions:
+            explosion.update()
+            explosion.draw(internal_surface, camera)
+            
+        # Optionally, remove explosions that have no particles left:
+        explosions = [e for e in explosions if e.particles]
+
         # Scale internal surface to fit the resized window
         scaled_surface = pygame.transform.smoothscale(internal_surface, (WINDOW_WIDTH, WINDOW_HEIGHT))
         screen.blit(scaled_surface, (0, 0))
 
         # Update the display
         pygame.display.flip()
-        clock.tick(60)  # Cap the frame rate
+        clock.tick(50)  # Cap the frame rate
     # Quit pygame properly
     pygame.quit()
 
