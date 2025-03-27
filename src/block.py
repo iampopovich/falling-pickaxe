@@ -74,7 +74,33 @@ class Block:
 
         self.destroyed = False
 
+        self.last_heal_time = None  # Track time of last healing (None initially)
+        self.heal_interval = 5000  # Heal every 5 seconds (5000 ms)
+        self.first_hit_time = None  # Track the time when the block was first hit
+
         space.add(self.body, self.shape)
+
+    def update(self):
+        """Update block state"""
+
+        # Check if the block was hit for the first time
+        if self.first_hit_time is None and self.hp < self.max_hp:
+            self.first_hit_time = pygame.time.get_ticks()
+            self.last_heal_time = self.first_hit_time
+
+        # Check if the block has been hit before and start healing 5 seconds after it was first hit
+        if self.first_hit_time is not None:
+            current_time = pygame.time.get_ticks()
+
+            # Start healing 5 seconds after the block was first hit
+            if current_time - self.first_hit_time >= 5000:
+                # Heal 20% of the max HP every 5 seconds (but not exceeding max_hp)
+                if current_time - self.last_heal_time >= self.heal_interval:
+                    healing_amount = self.max_hp * 0.2
+                    self.hp = min(self.hp + healing_amount, self.max_hp)
+
+                    # Reset the healing timer after each heal
+                    self.last_heal_time = current_time
 
     def draw(self, screen, camera):
         """Draw block at its position"""

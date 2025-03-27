@@ -87,6 +87,9 @@ class Pickaxe:
         block_shape = arbiter.shapes[1]  # Get the block shape
         block = block_shape.block_ref  # Get the actual block instance
 
+        block.first_hit_time = pygame.time.get_ticks()  
+        block.last_heal_time = block.first_hit_time
+        
         block.hp -= self.damage  # Reduce HP when hit
         if block.hp <= 0:
             block.destroyed = True

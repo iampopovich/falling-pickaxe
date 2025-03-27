@@ -155,6 +155,7 @@ def game():
                     block = get_block(0, chunk_y, x, y, texture_atlas, atlas_items, space)
                     if block == None:
                         continue
+                    block.update()
                     block.draw(internal_surface, camera)
 
         # Draw pickaxe
@@ -172,21 +173,3 @@ def game():
 
 game()
 
-
-# define a block 
-# define a pickaxe
-# define tnt 
-# place blocks 
-
-# add gravity to pickaxe and tnt
-# add bounciness to pickaxe and tnt
-# add explosion to tnt 
-# add sounds 
-
-# add hitboxes 
-# pickaxe can break blocks
-# tnt can break blocks by exploding 
-
-# connect chat to game 
-
-# item counts 
