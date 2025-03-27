@@ -6,7 +6,7 @@ from youtube import get_live_streams, get_live_stream, get_new_live_chat_message
 from config import config
 from atlas import create_texture_atlas 
 from pathlib import Path
-from chunk import get_block, clean_chunks, delete_block
+from chunk import get_block, clean_chunks, delete_block, chunks
 from constants import BLOCK_SCALE_FACTOR, BLOCK_SIZE, CHUNK_HEIGHT, CHUNK_WIDTH, INTERNAL_HEIGHT, INTERNAL_WIDTH
 from pickaxe import Pickaxe
 from camera import Camera

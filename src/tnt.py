@@ -3,6 +3,7 @@ import pymunk
 import math
 import random
 from constants import BLOCK_SIZE
+from chunk import chunks
 
 class Tnt:
     def __init__(self, space, x, y, texture_atlas, atlas_items, sound_manager, velocity=0, rotation=0, mass=70):
@@ -52,10 +53,31 @@ class Tnt:
         self.body.angle += random.choice([0.01, -0.01])
 
     def explode(self):
-        radius = 5 
+        explosion_radius = 3 * BLOCK_SIZE  # Explosion radius in pixels
         self.detonated = True
-        # damage blocks around the tnt 
-        
+
+        # Iterate over all chunks
+        for chunk in chunks:
+            for row in chunks[chunk]:
+                for block in row:
+                    # Skip blocks that might already be destroyed
+                    if block is None or getattr(block, "destroyed", False):
+                        continue
+
+                    # Calculate distance from TNT to block center
+                    dx = block.body.position.x - self.body.position.x
+                    dy = block.body.position.y - self.body.position.y
+                    distance = math.hypot(dx, dy)
+
+                    # If the block is within the explosion radius, damage it
+                    if distance <= explosion_radius:
+                        # Calculate damage as a function of distance
+                        # Full damage at the center, decreasing linearly to 0 at explosion_radius
+                        damage = int(100 * (1 - (distance / explosion_radius)))
+                        # Apply the damage (using block.take_damage if you have such a method,
+                        # or directly reducing block.hp)
+                        block.hp -= damage
+
         # create explosion particles
         
     def update(self, tnt_list):
