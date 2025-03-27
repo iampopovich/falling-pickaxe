@@ -89,14 +89,16 @@ class Pickaxe:
 
         block.first_hit_time = pygame.time.get_ticks()  
         block.last_heal_time = block.first_hit_time
-        
+
         block.hp -= self.damage  # Reduce HP when hit
         if block.hp <= 0:
             block.destroyed = True
             space.remove(block.body, block.shape)  # Remove from physics world
 
-        # play a random stone sound
-        self.sound_manager.play_sound("stone" + str(random.randint(1, 4)))
+        if (block.name == "grass_block" or block.name == "dirt"):
+            self.sound_manager.play_sound("grass" + str(random.randint(1, 4)))
+        else:
+            self.sound_manager.play_sound("stone" + str(random.randint(1, 4)))
         
     def update(self):
         """Apply gravity, update movement, check collisions, and rotate."""

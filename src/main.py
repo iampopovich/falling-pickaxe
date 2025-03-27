@@ -95,6 +95,10 @@ def game():
     sound_manager.load_sound("stone2", assets_dir / "sounds" / "stone2.wav")
     sound_manager.load_sound("stone3", assets_dir / "sounds" / "stone3.wav")
     sound_manager.load_sound("stone4", assets_dir / "sounds" / "stone4.wav")
+    sound_manager.load_sound("grass1", assets_dir / "sounds" / "grass1.wav")
+    sound_manager.load_sound("grass2", assets_dir / "sounds" / "grass2.wav")
+    sound_manager.load_sound("grass3", assets_dir / "sounds" / "grass3.wav")
+    sound_manager.load_sound("grass4", assets_dir / "sounds" / "grass4.wav")
 
     # Pickaxe
     pickaxe = Pickaxe(space, INTERNAL_WIDTH // 2, INTERNAL_HEIGHT // 2, texture_atlas.subsurface(atlas_items["item"]["diamond_pickaxe"]), sound_manager)

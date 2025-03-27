@@ -74,6 +74,8 @@ class Block:
 
         self.destroyed = False
 
+        self.name = name
+
         self.last_heal_time = None  # Track time of last healing (None initially)
         self.heal_interval = 5000  # Heal every 5 seconds (5000 ms)
         self.first_hit_time = None  # Track the time when the block was first hit
