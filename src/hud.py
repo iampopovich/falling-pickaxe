@@ -24,10 +24,10 @@ class Hud:
 
         self.position = position
         self.icon_size = (64, 64)  # Size to draw each icon
-        self.spacing = 10  # Space between items
+        self.spacing = 15  # Space between items
 
         # Initialize a font (using the default font and size 24)
-        self.font = pygame.font.Font(None, 48)
+        self.font = pygame.font.Font(None, 64)
 
     def update_amounts(self, new_amounts):
         """
@@ -58,8 +58,8 @@ class Hud:
             # Render the amount text
             text_surface = self.font.render(str(amount), True, (255, 255, 255))
             # Position text to the right of the icon
-            text_x = x + self.icon_size[0] + 5
-            text_y = y + (self.icon_size[1] - text_surface.get_height()) // 2
+            text_x = x + self.icon_size[0] + self.spacing
+            text_y = y + (self.icon_size[1] - text_surface.get_height()) // 2 + 3
             screen.blit(text_surface, (text_x, text_y))
 
             # Move to the next line
