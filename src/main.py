@@ -111,6 +111,10 @@ def game():
     tnt_spawn_interval = 1000 * random.uniform(config["TNT_SPAWN_INTERVAL_SECONDS_MIN"], config["TNT_SPAWN_INTERVAL_SECONDS_MAX"]) 
     tnt_list = []  # List to keep track of spawned TNT objects
 
+    # Random Pickaxe
+    last_random_pickaxe = pygame.time.get_ticks()
+    random_pickaxe_interval = 1000 * random.uniform(config["RANDOM_PICKAXE_INTERVAL_SECONDS_MIN"], config["RANDOM_PICKAXE_INTERVAL_SECONDS_MAX"]) 
+
     # Fast slow 
     fast_slow_active = False
     fast_slow = random.choice(["Fast", "Slow"])
@@ -185,6 +189,14 @@ def game():
             # New random interval for the next TNT spawn
             tnt_spawn_interval = 1000 * random.uniform(config["TNT_SPAWN_INTERVAL_SECONDS_MIN"], config["TNT_SPAWN_INTERVAL_SECONDS_MAX"]) 
 
+        # Check if it's time to change the pickaxe
+        if current_time - last_random_pickaxe >= random_pickaxe_interval:
+            pickaxe.random_pickaxe(texture_atlas, atlas_items)
+            last_random_pickaxe = current_time
+            # New random interval for the next pickaxe change
+            random_pickaxe_interval = 1000 * random.uniform(config["RANDOM_PICKAXE_INTERVAL_SECONDS_MIN"], config["RANDOM_PICKAXE_INTERVAL_SECONDS_MAX"])
+
+        # Check if it's time to change speed
         if current_time - last_fast_slow >= fast_slow_interval and not fast_slow_active:
             # Randomly choose between "fast" and "slow"
             fast_slow = random.choice(["Fast", "Slow"])

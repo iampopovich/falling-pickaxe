@@ -99,7 +99,25 @@ class Pickaxe:
 
         # Add small random rotation on hit
         self.body.angle += random.choice([0.01, -0.01])
-        
+
+    def random_pickaxe(self, texture_atlas, atlas_items): 
+        """Randomly change the pickaxe's properties."""
+
+        pickaxe_name = random.choice(list(atlas_items["pickaxe"].keys()))
+        self.texture = texture_atlas.subsurface(atlas_items["pickaxe"][pickaxe_name])
+        if(pickaxe_name =="wooden_pickaxe"):  
+            self.damage = 2
+        elif(pickaxe_name =="stone_pickaxe"):
+            self.damage = 4
+        elif(pickaxe_name =="iron_pickaxe"):
+            self.damage = 6
+        elif(pickaxe_name =="gold_pickaxe"):
+            self.damage = 8
+        elif(pickaxe_name =="diamond_pickaxe"):
+            self.damage = 10
+        elif(pickaxe_name =="netherite_pickaxe"):
+            self.damage = 12
+
     def update(self):
         """Apply gravity, update movement, check collisions, and rotate."""
         # Manually limit the falling speed (terminal velocity)
