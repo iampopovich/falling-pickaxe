@@ -118,6 +118,24 @@ class Pickaxe:
         elif(pickaxe_name =="netherite_pickaxe"):
             self.damage = 12
 
+    def pickaxe(self, name, texture_atlas, atlas_items):
+        """Set the pickaxe's properties based on its name."""
+
+        self.texture = texture_atlas.subsurface(atlas_items["pickaxe"][name])
+        if(name =="wooden_pickaxe"):  
+            self.damage = 2
+        elif(name =="stone_pickaxe"):
+            self.damage = 4
+        elif(name =="iron_pickaxe"):
+            self.damage = 6
+        elif(name =="gold_pickaxe"):
+            self.damage = 8
+        elif(name =="diamond_pickaxe"):
+            self.damage = 10
+        elif(name =="netherite_pickaxe"):
+            self.damage = 12
+
+
     def update(self):
         """Apply gravity, update movement, check collisions, and rotate."""
         # Manually limit the falling speed (terminal velocity)
