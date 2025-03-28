@@ -1,6 +1,7 @@
 import pygame
 import pymunk
 from constants import BLOCK_SIZE
+import random 
 
 class Block:
     def __init__(self, space, x, y, name, texture_atlas, atlas_items):
@@ -23,6 +24,9 @@ class Block:
             self.hp = 15
             self.max_hp = 15
         elif name == "iron_ore":
+            self.hp = 15
+            self.max_hp = 15
+        elif name == "copper_ore":
             self.hp = 15
             self.max_hp = 15
         elif name == "gold_ore":
@@ -82,7 +86,7 @@ class Block:
 
         space.add(self.body, self.shape)
 
-    def update(self, space):
+    def update(self, space, hud):
         """Update block state"""
 
         # Check if the block was hit for the first time
@@ -107,6 +111,23 @@ class Block:
         if self.hp <= 0 and not self.destroyed:
             self.destroyed = True
             space.remove(self.body, self.shape)  # Remove from physics world
+
+            if self.name == "coal_ore":
+                hud.amounts["coal"] += 1  # Add to HUD amounts
+            elif self.name == "iron_ore":
+                hud.amounts["iron_ingot"] += 1  # Add to HUD amounts
+            elif self.name == "copper_ore":
+                hud.amounts["copper_ingot"] += 1  # Add to HUD amounts
+            elif self.name == "gold_ore":
+                hud.amounts["gold_ingot"] += 1  # Add to HUD amounts
+            elif self.name == "diamond_ore":
+                hud.amounts["diamond"] += 1  # Add to HUD amounts
+            elif self.name == "emerald_ore":
+                hud.amounts["emerald"] += 1  # Add to HUD amounts
+            elif self.name == "redstone_ore":
+                hud.amounts["redstone"] += random.randint(4, 5)  # Add to HUD amounts
+            elif self.name == "lapis_ore":
+                hud.amounts["lapis_lazuli"] += random.randint(4, 8)  # Add to HUD amounts
 
     def draw(self, screen, camera):
         """Draw block at its position"""

@@ -186,7 +186,7 @@ def game():
                     if block == None:
                         continue
                     
-                    block.update(space)
+                    block.update(space, hud)
                     block.draw(internal_surface, camera)
 
         # Draw pickaxe
