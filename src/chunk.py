@@ -117,6 +117,9 @@ def generate_chunk(chunk_x, chunk_y, texture_atlas, atlas_items, space):
 chunks = {}
 
 def get_block(chunk_x, chunk_y, x, y, texture_atlas, atlas_items, space):
+    if chunk_y < 0:
+        return None
+
     if (chunk_x, chunk_y) not in chunks:
         chunks[(chunk_x, chunk_y)] = generate_chunk(chunk_x, chunk_y, texture_atlas, atlas_items, space)
 
