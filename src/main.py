@@ -12,6 +12,7 @@ from pickaxe import Pickaxe
 from camera import Camera
 from sound import SoundManager
 from tnt import Tnt
+import random
 
 # print("Fetching live streams...")
 # live_stream = None
@@ -106,7 +107,7 @@ def game():
 
     # TNT
     last_tnt_spawn = pygame.time.get_ticks()
-    tnt_spawn_interval = 1000 * config["TNT_SPAWN_INTERVAL_SECONDS"]  # 10 seconds in milliseconds
+    tnt_spawn_interval = 1000 * random.uniform(config["TNT_SPAWN_INTERVAL_SECONDS_MIN"], config["TNT_SPAWN_INTERVAL_SECONDS_MAX"]) 
     tnt_list = []  # List to keep track of spawned TNT objects
 
     # Camera
@@ -162,6 +163,8 @@ def game():
             new_tnt = Tnt(space, pickaxe.body.position.x, pickaxe.body.position.y - 100, texture_atlas, atlas_items, sound_manager)
             tnt_list.append(new_tnt)
             last_tnt_spawn = current_time
+            # New random interval for the next TNT spawn
+            tnt_spawn_interval = 1000 * random.uniform(config["TNT_SPAWN_INTERVAL_SECONDS_MIN"], config["TNT_SPAWN_INTERVAL_SECONDS_MAX"]) 
 
         # Update and draw all TNT objects
         for tnt in tnt_list:
@@ -209,3 +212,4 @@ def game():
 
 game()
 
+# check if pickaxe is outside the screen
