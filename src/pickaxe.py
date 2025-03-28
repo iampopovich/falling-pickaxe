@@ -3,7 +3,7 @@ import math
 import pymunk
 import pymunk.autogeometry
 from chunk import chunks
-from constants import BLOCK_SIZE
+from constants import BLOCK_SIZE, CHUNK_WIDTH
 import random
 
 def rotate_point(x, y, angle):
@@ -106,6 +106,9 @@ class Pickaxe:
         if self.body.velocity.y > 1000:
             self.body.velocity = (self.body.velocity.x, 1000)
 
+        # If pickaxe is outside the screen, reset its position
+        if self.body.position.x < 0 or self.body.position.x > BLOCK_SIZE * CHUNK_WIDTH:
+            self.body.position = (BLOCK_SIZE * CHUNK_WIDTH // 2, self.body.position.y)
 
     def draw(self, screen, camera):
         """Draw the pickaxe at its current position."""
