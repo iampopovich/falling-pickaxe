@@ -13,6 +13,7 @@ from camera import Camera
 from sound import SoundManager
 from tnt import Tnt
 import random
+from hud import Hud
 
 # print("Fetching live streams...")
 # live_stream = None
@@ -62,7 +63,7 @@ def game():
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption("Falling Pickaxe")
     # set icon
-    icon = pygame.image.load(Path(__file__).parent.parent / "src/assets/item" / "diamond_pickaxe.png")
+    icon = pygame.image.load(Path(__file__).parent.parent / "src/assets/pickaxe" / "diamond_pickaxe.png")
     pygame.display.set_icon(icon)
 
     # Create an internal surface with fixed resolution
@@ -103,7 +104,7 @@ def game():
     sound_manager.load_sound("grass4", assets_dir / "sounds" / "grass4.wav", 0.1)
 
     # Pickaxe
-    pickaxe = Pickaxe(space, INTERNAL_WIDTH // 2, INTERNAL_HEIGHT // 2, texture_atlas.subsurface(atlas_items["item"]["diamond_pickaxe"]), sound_manager)
+    pickaxe = Pickaxe(space, INTERNAL_WIDTH // 2, INTERNAL_HEIGHT // 2, texture_atlas.subsurface(atlas_items["pickaxe"]["diamond_pickaxe"]), sound_manager)
 
     # TNT
     last_tnt_spawn = pygame.time.get_ticks()
@@ -112,6 +113,9 @@ def game():
 
     # Camera
     camera = Camera()
+
+    # HUD
+    hud = Hud(texture_atlas, atlas_items)
 
     # Explosions
     explosions = []
@@ -199,6 +203,9 @@ def game():
             
         # Optionally, remove explosions that have no particles left:
         explosions = [e for e in explosions if e.particles]
+
+        # Draw HUD
+        hud.draw(internal_surface)
 
         # Scale internal surface to fit the resized window
         scaled_surface = pygame.transform.smoothscale(internal_surface, (WINDOW_WIDTH, WINDOW_HEIGHT))

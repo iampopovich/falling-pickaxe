@@ -2,7 +2,7 @@ import os
 import pygame
 
 def create_texture_atlas(asset_path):
-    categories = ['block', 'item', 'destroy_stage', 'particle']
+    categories = ['block', 'item', 'destroy_stage', 'particle', "pickaxe"]
     textures = {category: {} for category in categories}
     images = []
     positions = {}
