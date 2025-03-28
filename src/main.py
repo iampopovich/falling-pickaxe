@@ -104,7 +104,7 @@ def game():
     sound_manager.load_sound("grass4", assets_dir / "sounds" / "grass4.wav", 0.1)
 
     # Pickaxe
-    pickaxe = Pickaxe(space, INTERNAL_WIDTH // 2, INTERNAL_HEIGHT // 2, texture_atlas.subsurface(atlas_items["pickaxe"]["diamond_pickaxe"]), sound_manager)
+    pickaxe = Pickaxe(space, INTERNAL_WIDTH // 2, INTERNAL_HEIGHT // 2, texture_atlas.subsurface(atlas_items["pickaxe"]["wooden_pickaxe"]), sound_manager)
 
     # TNT
     last_tnt_spawn = pygame.time.get_ticks()

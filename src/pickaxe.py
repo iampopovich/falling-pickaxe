@@ -27,7 +27,7 @@ def rotate_vertices(vertices, angle):
         return rotated_vertices
 
 class Pickaxe:
-    def __init__(self, space, x, y, texture, sound_manager, damage=10, velocity=0, rotation=0, mass=100):
+    def __init__(self, space, x, y, texture, sound_manager, damage=2, velocity=0, rotation=0, mass=100):
         self.texture = texture
         self.velocity = velocity
         self.rotation = rotation
