@@ -38,7 +38,7 @@ class Hud:
         """
         self.amounts.update(new_amounts)
 
-    def draw(self, screen, pickaxe_y):
+    def draw(self, screen, pickaxe_y, fast_slow_active, fast_slow):
         """
         Draws the HUD: each ore icon with its amount.
         """
@@ -69,7 +69,21 @@ class Hud:
 
         # Draw the pickaxe position indicator
         pickaxe_indicator_x = x + self.spacing
-        pickaxe_indicator_y = y + (self.icon_size[1] - 20) // 2 + 3
+        pickaxe_indicator_y = y + self.spacing
         pickaxe_indicator_surface = self.font.render(f"Y: {-int(pickaxe_y // BLOCK_SIZE)}", True, (255, 255, 255))
         screen.blit(pickaxe_indicator_surface, (pickaxe_indicator_x, pickaxe_indicator_y))
+
+        # Draw the fast/slow indicator
+        if fast_slow_active:
+            fast_slow_surface = self.font.render(f"{fast_slow}", True, (255, 255, 255))
+            fast_slow_x = x + self.spacing
+            fast_slow_y = y + 2 * self.spacing + fast_slow_surface.get_height()
+            screen.blit(fast_slow_surface, (fast_slow_x, fast_slow_y))
+        else:
+            fast_slow_surface = self.font.render("Normal", True, (255, 255, 255))
+            fast_slow_x = x + self.spacing
+            fast_slow_y = y + 2 * self.spacing + fast_slow_surface.get_height()
+            screen.blit(fast_slow_surface, (fast_slow_x, fast_slow_y))
+
+        
 

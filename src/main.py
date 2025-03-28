@@ -111,6 +111,12 @@ def game():
     tnt_spawn_interval = 1000 * random.uniform(config["TNT_SPAWN_INTERVAL_SECONDS_MIN"], config["TNT_SPAWN_INTERVAL_SECONDS_MAX"]) 
     tnt_list = []  # List to keep track of spawned TNT objects
 
+    # Fast slow 
+    fast_slow_active = False
+    fast_slow = random.choice(["Fast", "Slow"])
+    fast_slow_interval = 1000 * random.uniform(config["FAST_SLOW_INTERVAL_SECONDS_MIN"], config["FAST_SLOW_INTERVAL_SECONDS_MAX"])
+    last_fast_slow = pygame.time.get_ticks()
+
     # Camera
     camera = Camera()
 
@@ -142,7 +148,16 @@ def game():
         # ++++++++++++++++++  UPDATE ++++++++++++++++++
         # Determine which chunks are visible
         # Update physics
-        space.step(1 / 60.0) 
+        
+        step_speed = 1 / 60.0  # Fixed time step for physics simulation
+        if fast_slow_active and fast_slow == "Fast":
+            step_speed = 1 / 30
+        elif fast_slow_active and fast_slow == "Slow":
+            step_speed = 1 / 120
+
+        space.step(step_speed) 
+
+
 
         start_chunk_y = int(pickaxe.body.position.y // (CHUNK_HEIGHT * BLOCK_SIZE) - 1) - 1
         end_chunk_y = int(pickaxe.body.position.y + INTERNAL_HEIGHT) // (CHUNK_HEIGHT * BLOCK_SIZE)  + 1
@@ -169,6 +184,17 @@ def game():
             last_tnt_spawn = current_time
             # New random interval for the next TNT spawn
             tnt_spawn_interval = 1000 * random.uniform(config["TNT_SPAWN_INTERVAL_SECONDS_MIN"], config["TNT_SPAWN_INTERVAL_SECONDS_MAX"]) 
+
+        if current_time - last_fast_slow >= fast_slow_interval and not fast_slow_active:
+            # Randomly choose between "fast" and "slow"
+            fast_slow = random.choice(["Fast", "Slow"])
+            fast_slow_active = True
+            last_fast_slow = current_time
+            # New random interval for the next fast/slow spawn
+            fast_slow_interval = 1000 * random.uniform(config["FAST_SLOW_INTERVAL_SECONDS_MIN"], config["FAST_SLOW_INTERVAL_SECONDS_MAX"])
+        elif current_time - last_fast_slow >= (1000 * config["FAST_SLOW_DURATION_SECONDS"]) and fast_slow_active:
+            fast_slow_active = False
+            last_fast_slow = current_time
 
         # Update and draw all TNT objects
         for tnt in tnt_list:
@@ -205,7 +231,7 @@ def game():
         explosions = [e for e in explosions if e.particles]
 
         # Draw HUD
-        hud.draw(internal_surface, pickaxe.body.position.y)
+        hud.draw(internal_surface, pickaxe.body.position.y, fast_slow_active, fast_slow)
 
         # Scale internal surface to fit the resized window
         scaled_surface = pygame.transform.smoothscale(internal_surface, (WINDOW_WIDTH, WINDOW_HEIGHT))
