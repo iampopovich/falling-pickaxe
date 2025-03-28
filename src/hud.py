@@ -70,6 +70,6 @@ class Hud:
         # Draw the pickaxe position indicator
         pickaxe_indicator_x = x + self.spacing
         pickaxe_indicator_y = y + (self.icon_size[1] - 20) // 2 + 3
-        pickaxe_indicator_surface = self.font.render(f"Y: {-int(pickaxe_y  // BLOCK_SIZE)}", True, (255, 255, 255))
+        pickaxe_indicator_surface = self.font.render(f"Y: {-int(pickaxe_y // BLOCK_SIZE)}", True, (255, 255, 255))
         screen.blit(pickaxe_indicator_surface, (pickaxe_indicator_x, pickaxe_indicator_y))
 
