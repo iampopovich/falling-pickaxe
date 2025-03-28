@@ -205,7 +205,7 @@ def game():
         explosions = [e for e in explosions if e.particles]
 
         # Draw HUD
-        hud.draw(internal_surface)
+        hud.draw(internal_surface, pickaxe.body.position.y)
 
         # Scale internal surface to fit the resized window
         scaled_surface = pygame.transform.smoothscale(internal_surface, (WINDOW_WIDTH, WINDOW_HEIGHT))
