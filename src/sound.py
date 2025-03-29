@@ -3,6 +3,7 @@ import pygame
 class SoundManager:
     def __init__(self):
         pygame.mixer.init()  # Initialize the mixer
+        pygame.mixer.set_num_channels(128)
         self.sounds = {}
 
     def load_sound(self, name, path, volume=1.0):
