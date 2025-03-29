@@ -1,6 +1,24 @@
 import pygame
 from constants import BLOCK_SIZE, CHUNK_HEIGHT
 
+def render_text_with_outline(text, font, text_color, outline_color, outline_width=2):
+    # Render the text in the main color.
+    text_surface = font.render(text, True, text_color)
+    # Create a new surface larger than the text surface to hold the outline.
+    w, h = text_surface.get_size()
+    outline_surface = pygame.Surface((w + 2*outline_width, h + 2*outline_width), pygame.SRCALPHA)
+    
+    # Blit the text multiple times in the outline color, offset by outline_width in every direction.
+    for dx in range(-outline_width, outline_width+1):
+        for dy in range(-outline_width, outline_width+1):
+            # Only draw outline if offset is non-zero (avoids overdraw, though it's not a big deal)
+            if dx != 0 or dy != 0:
+                pos = (dx + outline_width, dy + outline_width)
+                outline_surface.blit(font.render(text, True, outline_color), pos)
+    
+    # Blit the main text in the center.
+    outline_surface.blit(text_surface, (outline_width, outline_width))
+    return outline_surface
 
 class Hud:
     def __init__(self, texture_atlas, atlas_items, position=(32, 32)):
@@ -40,7 +58,7 @@ class Hud:
 
     def draw(self, screen, pickaxe_y, fast_slow_active, fast_slow):
         """
-        Draws the HUD: each ore icon with its amount.
+        Draws the HUD: each ore icon with its amount and other indicators.
         """
         x, y = self.position
 
@@ -57,8 +75,11 @@ class Hud:
                 # In case the ore key is missing, skip drawing the icon
                 continue
 
-            # Render the amount text
-            text_surface = self.font.render(str(amount), True, (255, 255, 255))
+            # Render the amount text with a black outline.
+            text = str(amount)
+            # You can tweak outline_width, text color, and outline color as needed.
+            text_surface = render_text_with_outline(text, self.font, (255, 255, 255), (0, 0, 0), outline_width=2)
+            
             # Position text to the right of the icon
             text_x = x + self.icon_size[0] + self.spacing
             text_y = y + (self.icon_size[1] - text_surface.get_height()) // 2 + 3
@@ -67,23 +88,22 @@ class Hud:
             # Move to the next line
             y += self.icon_size[1] + self.spacing
 
-        # Draw the pickaxe position indicator
+        # Draw the pickaxe position indicator with outlined text
+        pickaxe_indicator_text = f"Y: {-int(pickaxe_y // BLOCK_SIZE)}"
+        pickaxe_indicator_surface = render_text_with_outline(pickaxe_indicator_text, self.font, (255, 255, 255), (0, 0, 0), outline_width=2)
         pickaxe_indicator_x = x + self.spacing
         pickaxe_indicator_y = y + self.spacing
-        pickaxe_indicator_surface = self.font.render(f"Y: {-int(pickaxe_y // BLOCK_SIZE)}", True, (255, 255, 255))
         screen.blit(pickaxe_indicator_surface, (pickaxe_indicator_x, pickaxe_indicator_y))
 
-        # Draw the fast/slow indicator
+        # Draw the fast/slow indicator with outlined text
         if fast_slow_active:
-            fast_slow_surface = self.font.render(f"{fast_slow}", True, (255, 255, 255))
-            fast_slow_x = x + self.spacing
-            fast_slow_y = y + 2 * self.spacing + fast_slow_surface.get_height()
-            screen.blit(fast_slow_surface, (fast_slow_x, fast_slow_y))
+            fast_slow_text = f"{fast_slow}"
         else:
-            fast_slow_surface = self.font.render("Normal", True, (255, 255, 255))
-            fast_slow_x = x + self.spacing
-            fast_slow_y = y + 2 * self.spacing + fast_slow_surface.get_height()
-            screen.blit(fast_slow_surface, (fast_slow_x, fast_slow_y))
+            fast_slow_text = "Normal"
+        fast_slow_surface = render_text_with_outline(fast_slow_text, self.font, (255, 255, 255), (0, 0, 0), outline_width=2)
+        fast_slow_x = x + self.spacing
+        fast_slow_y = y + 2 * self.spacing + fast_slow_surface.get_height()
+        screen.blit(fast_slow_surface, (fast_slow_x, fast_slow_y))
 
-        
+            
 
