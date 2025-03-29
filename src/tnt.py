@@ -8,6 +8,7 @@ from explosion import Explosion
 
 class Tnt:
     def __init__(self, space, x, y, texture_atlas, atlas_items, sound_manager, velocity=0, rotation=0, mass=70):
+        print("Spawning TNT")
         self.texture_atlas = texture_atlas
         self.atlas_items = atlas_items
 

@@ -33,6 +33,7 @@ class Pickaxe:
         self.rotation = rotation
         self.space = space
         self.damage = damage
+        self.is_enlarged = False
 
         vertices = rotate_vertices([
                     (0, 0), # A
@@ -105,6 +106,13 @@ class Pickaxe:
 
         pickaxe_name = random.choice(list(atlas_items["pickaxe"].keys()))
         self.texture = texture_atlas.subsurface(atlas_items["pickaxe"][pickaxe_name])
+        print("Setting pickaxe to:", pickaxe_name)
+
+        if self.is_enlarged:
+            # Scale up texture
+            new_size = (BLOCK_SIZE * 3, BLOCK_SIZE * 3)
+            self.texture = pygame.transform.scale(self.texture, new_size)
+
         if(pickaxe_name =="wooden_pickaxe"):  
             self.damage = 2
         elif(pickaxe_name =="stone_pickaxe"):
@@ -120,8 +128,15 @@ class Pickaxe:
 
     def pickaxe(self, name, texture_atlas, atlas_items):
         """Set the pickaxe's properties based on its name."""
+        print("Setting pickaxe to:", name)
 
         self.texture = texture_atlas.subsurface(atlas_items["pickaxe"][name])
+
+        if self.is_enlarged:
+            # Scale up texture
+            new_size = (BLOCK_SIZE * 3, BLOCK_SIZE * 3)
+            self.texture = pygame.transform.scale(self.texture, new_size)
+
         if(name =="wooden_pickaxe"):  
             self.damage = 2
         elif(name =="stone_pickaxe"):
@@ -146,9 +161,57 @@ class Pickaxe:
         if self.body.position.x < 0 or self.body.position.x > BLOCK_SIZE * CHUNK_WIDTH:
             self.body.position = (BLOCK_SIZE * CHUNK_WIDTH // 2, self.body.position.y)
 
+        if hasattr(self, "enlarge_end_time") and pygame.time.get_ticks() > self.enlarge_end_time:
+            self.reset_size()
+            self.is_enlarged = False
+
     def draw(self, screen, camera):
         """Draw the pickaxe at its current position."""
         rotated_image = pygame.transform.rotate(self.texture, -math.degrees(self.body.angle))  # Convert to degrees
         rect = rotated_image.get_rect(center=(self.body.position.x, self.body.position.y))
         rect.y -= camera.offset_y
         screen.blit(rotated_image, rect)
+
+    def enlarge(self, duration=5000):
+        """Temporarily makes the pickaxe 3 times bigger with a larger hitbox."""
+        print("Enlarging pickaxe")
+
+        self.original_shapes = self.shapes[:]  # Store original hitbox
+        self.is_enlarged = True
+
+        # Scale up texture
+        new_size = (BLOCK_SIZE * 3, BLOCK_SIZE * 3)
+        self.texture = pygame.transform.scale(self.texture, new_size)
+
+        # Scale up hitbox
+        self.space.remove(*self.shapes)  # Remove old shapes
+        self.shapes = []  # Reset shape list
+
+        for shape in self.original_shapes:
+            scaled_vertices = [(x * 3, y * 3) for x, y in shape.get_vertices()]
+            new_shape = pymunk.Poly(self.body, scaled_vertices)
+            new_shape.elasticity = shape.elasticity
+            new_shape.friction = shape.friction
+            new_shape.collision_type = shape.collision_type
+            self.shapes.append(new_shape)
+
+        self.space.add(*self.shapes)  # Add new shapes
+
+        # Track when effect should end
+        self.enlarge_end_time = pygame.time.get_ticks() + duration
+
+    
+    def reset_size(self):
+        """Restore the pickaxe to its original size."""
+        if hasattr(self, "original_shapes"):
+            # Scale down texture
+            new_size = (BLOCK_SIZE, BLOCK_SIZE)
+            self.texture = pygame.transform.scale(self.texture, new_size)
+
+            # Reset hitbox
+            self.space.remove(*self.shapes)
+            self.shapes = self.original_shapes[:]
+            self.space.add(*self.shapes)
+            self.is_enlarged = False
+
+            del self.enlarge_end_time  # Remove the enlargement timer

@@ -115,6 +115,11 @@ def game():
     last_random_pickaxe = pygame.time.get_ticks()
     random_pickaxe_interval = 1000 * random.uniform(config["RANDOM_PICKAXE_INTERVAL_SECONDS_MIN"], config["RANDOM_PICKAXE_INTERVAL_SECONDS_MAX"]) 
 
+    # Pickaxe enlargement
+    last_enlarge = pygame.time.get_ticks()
+    enlarge_interval = 1000 * random.uniform(config["PICKAXE_ENLARGE_INTERVAL_SECONDS_MIN"], config["PICKAXE_ENLARGE_INTERVAL_SECONDS_MAX"])
+    enlarge_duration = 1000 * config["PICKAXE_ENLARGE_DURATION_SECONDS"]
+
     # Fast slow 
     fast_slow_active = False
     fast_slow = random.choice(["Fast", "Slow"])
@@ -196,10 +201,17 @@ def game():
             # New random interval for the next pickaxe change
             random_pickaxe_interval = 1000 * random.uniform(config["RANDOM_PICKAXE_INTERVAL_SECONDS_MIN"], config["RANDOM_PICKAXE_INTERVAL_SECONDS_MAX"])
 
+        if current_time - last_enlarge >= enlarge_interval:
+            pickaxe.enlarge(enlarge_duration)
+            last_enlarge = current_time + enlarge_duration
+            # New random interval for the next enlargement
+            enlarge_interval = 1000 * random.uniform(config["PICKAXE_ENLARGE_INTERVAL_SECONDS_MIN"], config["PICKAXE_ENLARGE_INTERVAL_SECONDS_MAX"])
+
         # Check if it's time to change speed
         if current_time - last_fast_slow >= fast_slow_interval and not fast_slow_active:
             # Randomly choose between "fast" and "slow"
             fast_slow = random.choice(["Fast", "Slow"])
+            print("Changing speed to:", fast_slow)
             fast_slow_active = True
             last_fast_slow = current_time
             # New random interval for the next fast/slow spawn
