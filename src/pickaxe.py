@@ -119,7 +119,7 @@ class Pickaxe:
             self.damage = 4
         elif(pickaxe_name =="iron_pickaxe"):
             self.damage = 6
-        elif(pickaxe_name =="gold_pickaxe"):
+        elif(pickaxe_name =="golden_pickaxe"):
             self.damage = 8
         elif(pickaxe_name =="diamond_pickaxe"):
             self.damage = 10
@@ -128,9 +128,9 @@ class Pickaxe:
 
     def pickaxe(self, name, texture_atlas, atlas_items):
         """Set the pickaxe's properties based on its name."""
-        print("Setting pickaxe to:", name)
 
         self.texture = texture_atlas.subsurface(atlas_items["pickaxe"][name])
+        print("Setting pickaxe to:", name)
 
         if self.is_enlarged:
             # Scale up texture
@@ -143,7 +143,7 @@ class Pickaxe:
             self.damage = 4
         elif(name =="iron_pickaxe"):
             self.damage = 6
-        elif(name =="gold_pickaxe"):
+        elif(name =="golden_pickaxe"):
             self.damage = 8
         elif(name =="diamond_pickaxe"):
             self.damage = 10
@@ -199,7 +199,6 @@ class Pickaxe:
 
         # Track when effect should end
         self.enlarge_end_time = pygame.time.get_ticks() + duration
-
     
     def reset_size(self):
         """Restore the pickaxe to its original size."""

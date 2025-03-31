@@ -76,6 +76,7 @@ def get_new_live_chat_messages(live_chat_id):
     # Generate log file path
     log_file = log_dir / f"chat_{datetime.today().strftime('%Y-%m-%d')}.txt"
 
+    messages = [];
     for item in response["items"]:
         message_id = item["id"]  # Unique message ID
         if message_id not in seen_messages:
@@ -97,10 +98,14 @@ def get_new_live_chat_messages(live_chat_id):
             with open(log_file, "a+", encoding="utf-8") as chat_file:
                 chat_file.write(log_message + "\n")
 
-            # Print the message
-            print(log_message)
-    
-    return response
+            messages.append({
+                "timestamp": timestamp,
+                "author": author,
+                "message": message,
+                "sc_details": item["snippet"].get("superChatDetails", None)
+            })
+
+    return messages
 
 def get_subscriber_count(channel_id):
     """Get the subscriber count for a given channel ID."""
