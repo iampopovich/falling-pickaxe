@@ -8,6 +8,7 @@ import os
 # Initialize YouTube API client
 youtube = build("youtube", "v3", developerKey=config["API_KEY"])
 
+# This consumes a lot of quota (100 units per call)
 def get_live_streams(channel_id):
     """Retrieve all currently live streams for a given channel with their titles"""
     request = youtube.search().list(
@@ -58,10 +59,11 @@ def get_live_chat_messages(live_chat_id):
         message = item["snippet"]["displayMessage"]
         print(f"{author}: {message}")
 
-# Store seen message IDs
+
+# Global set to track seen message IDs
 seen_messages = set()
 def get_new_live_chat_messages(live_chat_id):
-    """Fetch and print only new chat messages that haven't been printed before."""
+    """Fetch and print only new chat messages (including super chats) that haven't been printed before."""
     response = youtube.liveChatMessages().list(
         liveChatId=live_chat_id,
         part="snippet,authorDetails"
@@ -78,19 +80,37 @@ def get_new_live_chat_messages(live_chat_id):
         message_id = item["id"]  # Unique message ID
         if message_id not in seen_messages:
             seen_messages.add(message_id)  # Mark as seen
-            
+
             author = item["authorDetails"]["displayName"]
             message = item["snippet"]["displayMessage"]
-            timestamp = item["snippet"]["publishedAt"]  # UTC timestamp from API
-            
-            # Use dateutil to parse timestamp automatically
-            timestamp = parser.parse(timestamp).strftime("%Y-%m-%d %H:%M:%S")
+            timestamp = parser.parse(item["snippet"]["publishedAt"]).strftime("%Y-%m-%d %H:%M:%S")
+
+            # Check if this is a super chat message
+            if "superChatDetails" in item["snippet"]:
+                sc_details = item["snippet"]["superChatDetails"]
+                amount = sc_details.get("amountDisplayString", "N/A")
+                log_message = f"[{timestamp}] Super Chat from {author} ({amount}): {message}"
+            else:
+                log_message = f"[{timestamp}] {author}: {message}"
 
             # Write to file 
             with open(log_file, "a+", encoding="utf-8") as chat_file:
-                chat_file.write(f"[{timestamp}] {author}: {message}\n")
+                chat_file.write(log_message + "\n")
 
-            # Print with timestamp
-            print(f"[{timestamp}] {author}: {message}")
+            # Print the message
+            print(log_message)
     
     return response
+
+def get_subscriber_count(channel_id):
+    """Get the subscriber count for a given channel ID."""
+    request = youtube.channels().list(
+        part="statistics",
+        id=channel_id
+    )
+    response = request.execute()
+
+    if response["items"]:
+        return int(response["items"][0]["statistics"]["subscriberCount"])
+    else:
+        return None

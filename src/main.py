@@ -2,7 +2,7 @@ import time
 import pygame
 import pymunk
 import pymunk.pygame_util   
-from youtube import get_live_streams, get_live_stream, get_new_live_chat_messages, get_live_chat_id
+from youtube import get_live_stream, get_new_live_chat_messages, get_live_chat_id, get_subscriber_count
 from config import config
 from atlas import create_texture_atlas 
 from pathlib import Path
@@ -15,38 +15,40 @@ from tnt import Tnt
 import random
 from hud import Hud
 
-# print("Fetching live streams...")
-# live_stream = None
+print("Fetching live stream...")
+live_stream = None
+live_chat_id = None
+subscribers = None
 
-# # Fetch live streams
-# print("Checking for specific live stream")
-# if config["LIVESTREAM_ID"] is not None and config["LIVESTREAM_ID"] != "":
-#     live_stream = get_live_stream(config["LIVESTREAM_ID"])
+# Fetch live streams
+print("Checking for specific live stream")
+if config["LIVESTREAM_ID"] is not None and config["LIVESTREAM_ID"] != "":
+    live_stream = get_live_stream(config["LIVESTREAM_ID"])
 
-# if live_stream is None:
-#     print("No live stream found from config. Fetching all live streams instead...")
-#     live_videos = get_live_streams(config["CHANNEL_ID"])
-#     live_stream = get_live_stream(live_videos[0]["video_id"])
+if live_stream is None:
+    print("No specific live stream found. App will run without it.")
+else:
+    print("Live stream found:", live_stream["snippet"]["title"])
 
-# # Print live stream information
-# if live_stream is not None:
-#     print(f"Live stream found: {live_stream["snippet"]['title']} | Link: https://www.youtube.com/watch?v={live_stream["id"]}")
-# else:
-#     print("No live streams found.")
+# get chat id from live stream
+if live_stream is not None:
+    print("Fetching live chat ID...")
+    live_chat_id = get_live_chat_id(live_stream["id"])
 
-# # get chat id from live stream
-# live_chat_id = get_live_chat_id(live_stream["id"])
+if live_chat_id is None:
+    print("No live chat ID found. App will run without it.")
+else:
+    print("Live chat ID found:", live_chat_id)
 
-# Fetch live chat messages
-# print("Fetching live chat messages...")
+# get subscribers count
+if(config["CHANNEL_ID"] is not None and config["CHANNEL_ID"] != ""):
+    print("Fetching subscribers count...")
+    subscribers = get_subscriber_count(config["CHANNEL_ID"])
 
-# while True:
-#     # sleep for 5 seconds
-#     messages = get_new_live_chat_messages(live_chat_id)
-#     time.sleep(config["CHAT_UPDATE_INTERVAL_SECONDS"])
-
-# Initialize texture atlas
-
+if subscribers is None:
+    print("No subscribers count found. App will run without it.")
+else:
+    print("Subscribers count found:", subscribers)
 
 def game():
     WINDOW_WIDTH, WINDOW_HEIGHT = 540, 960  # Half of internal resolution
@@ -134,6 +136,14 @@ def game():
 
     # Explosions
     explosions = []
+
+    # Youtube
+    yt_poll_interval = 1000 * config["YT_POLL_INTERVAL_SECONDS"]
+    last_yt_poll = pygame.time.get_ticks()
+
+    # Save progress interval 
+    save_progress_interval = 1000 * config["SAVE_PROGRESS_INTERVAL_SECONDS"]
+    last_save_progress = pygame.time.get_ticks()
 
     # Main loop
     running = True
@@ -260,6 +270,26 @@ def game():
         # Scale internal surface to fit the resized window
         scaled_surface = pygame.transform.smoothscale(internal_surface, (WINDOW_WIDTH, WINDOW_HEIGHT))
         screen.blit(scaled_surface, (0, 0))
+
+        # Save progress
+        if current_time - last_save_progress >= save_progress_interval:
+            # Save the game state or progress here
+            print("Saving progress...")
+            last_save_progress = current_time
+            # Save progress to logs folder
+            log_dir = Path(__file__).parent.parent / "logs"
+            log_dir.mkdir(parents=True, exist_ok=True)
+            with open(log_dir / "progress.txt", "a+") as f:
+                f.write(f"Date: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f.write(f"Y: {-int(pickaxe.body.position.y // BLOCK_SIZE)} ")
+                f.write(f"coal: {hud.amounts['coal']} ")
+                f.write(f"iron: {hud.amounts['iron_ingot']} ")   
+                f.write(f"gold: {hud.amounts['gold_ingot']} ")
+                f.write(f"copper: {hud.amounts['copper_ingot']} ")
+                f.write(f"redstone: {hud.amounts['redstone']} ")
+                f.write(f"lapis: {hud.amounts['lapis_lazuli']} ")
+                f.write(f"diamond: {hud.amounts['diamond']} ")
+                f.write(f"emerald: {hud.amounts['emerald']} ")
 
         # Update the display
         pygame.display.flip()
