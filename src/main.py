@@ -70,8 +70,9 @@ async def handle_youtube_poll():
         author = message["author"]
         text = message["message"]
         is_superchat = message["sc_details"] is not None
+        is_supersticker = message["ss_details"] is not None
 
-        if is_superchat:
+        if is_superchat or is_supersticker:
             tnt_superchat_queue.append((author, text))
 
         if "tnt" in text.lower() and author not in tnt_queue:

@@ -63,7 +63,7 @@ def get_live_chat_messages(live_chat_id):
 # Global set to track seen message IDs
 seen_messages = set()
 def get_new_live_chat_messages(live_chat_id):
-    """Fetch and print only new chat messages (including super chats) that haven't been printed before."""
+    """Fetch and print only new chat messages (including super chats and super stickers) that haven't been printed before."""
     response = youtube.liveChatMessages().list(
         liveChatId=live_chat_id,
         part="snippet,authorDetails"
@@ -76,7 +76,7 @@ def get_new_live_chat_messages(live_chat_id):
     # Generate log file path
     log_file = log_dir / f"chat_{datetime.today().strftime('%Y-%m-%d')}.txt"
 
-    messages = [];
+    messages = []
     for item in response["items"]:
         message_id = item["id"]  # Unique message ID
         if message_id not in seen_messages:
@@ -86,11 +86,16 @@ def get_new_live_chat_messages(live_chat_id):
             message = item["snippet"]["displayMessage"]
             timestamp = parser.parse(item["snippet"]["publishedAt"]).strftime("%Y-%m-%d %H:%M:%S")
 
-            # Check if this is a super chat message
+            # Check for super chat first, then for super sticker
             if "superChatDetails" in item["snippet"]:
                 sc_details = item["snippet"]["superChatDetails"]
                 amount = sc_details.get("amountDisplayString", "N/A")
                 log_message = f"[{timestamp}] Super Chat from {author} ({amount}): {message}"
+            elif "superStickerDetails" in item["snippet"]:
+                ss_details = item["snippet"]["superStickerDetails"]
+                amount = ss_details.get("amountDisplayString", "N/A")
+                tier = ss_details.get("tier", "N/A")
+                log_message = f"[{timestamp}] Super Sticker from {author} (Tier {tier}, {amount}): {message}"
             else:
                 log_message = f"[{timestamp}] {author}: {message}"
 
@@ -102,7 +107,8 @@ def get_new_live_chat_messages(live_chat_id):
                 "timestamp": timestamp,
                 "author": author,
                 "message": message,
-                "sc_details": item["snippet"].get("superChatDetails", None)
+                "sc_details": item["snippet"].get("superChatDetails", None),
+                "ss_details": item["snippet"].get("superStickerDetails", None)
             })
 
     return messages
