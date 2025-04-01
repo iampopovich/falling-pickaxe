@@ -21,7 +21,7 @@ live_stream = None
 live_chat_id = None
 subscribers = None
 
-if config["CHAT_CONTROL"] == "true":
+if config["CHAT_CONTROL"] == True:
     print("Checking for specific live stream")
     if config["LIVESTREAM_ID"] is not None and config["LIVESTREAM_ID"] != "":
         live_stream = get_live_stream(config["LIVESTREAM_ID"])
