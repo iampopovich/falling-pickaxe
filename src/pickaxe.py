@@ -176,38 +176,44 @@ class Pickaxe:
         """Temporarily makes the pickaxe 3 times bigger with a larger hitbox."""
         print("Enlarging pickaxe")
 
-        self.original_shapes = self.shapes[:]  # Store original hitbox
+        # If already enlarged, just extend the duration.
+        if hasattr(self, "is_enlarged") and self.is_enlarged:
+            self.enlarge_end_time += duration
+            return
+
+        # Not enlarged yet, so store original texture and shapes
+        self.original_texture = self.texture.copy()
+        self.original_shapes = self.shapes[:]  # Store original hitbox shapes
         self.is_enlarged = True
 
-        # Scale up texture
+        # Scale up texture using the original texture.
         new_size = (BLOCK_SIZE * 3, BLOCK_SIZE * 3)
-        self.texture = pygame.transform.scale(self.texture, new_size)
+        self.texture = pygame.transform.scale(self.original_texture, new_size)
 
-        # Scale up hitbox
-        self.space.remove(*self.shapes)  # Remove old shapes
-        self.shapes = []  # Reset shape list
-
+        # Scale up hitbox:
+        self.space.remove(*self.shapes)  # Remove current shapes
+        new_shapes = []
         for shape in self.original_shapes:
+            # Get vertices from original shape and scale them by 3.
             scaled_vertices = [(x * 3, y * 3) for x, y in shape.get_vertices()]
             new_shape = pymunk.Poly(self.body, scaled_vertices)
             new_shape.elasticity = shape.elasticity
             new_shape.friction = shape.friction
             new_shape.collision_type = shape.collision_type
-            self.shapes.append(new_shape)
+            new_shapes.append(new_shape)
+        self.shapes = new_shapes
+        self.space.add(*self.shapes)  # Add new enlarged shapes
 
-        self.space.add(*self.shapes)  # Add new shapes
-
-        # Track when effect should end
+        # Track when the enlargement effect should end
         self.enlarge_end_time = pygame.time.get_ticks() + duration
-    
+
     def reset_size(self):
         """Restore the pickaxe to its original size."""
         if hasattr(self, "original_shapes"):
-            # Scale down texture
-            new_size = (BLOCK_SIZE, BLOCK_SIZE)
-            self.texture = pygame.transform.scale(self.texture, new_size)
+            # Restore texture using the stored original.
+            self.texture = self.original_texture.copy()
 
-            # Reset hitbox
+            # Reset hitbox: remove enlarged shapes and add back the original shapes.
             self.space.remove(*self.shapes)
             self.shapes = self.original_shapes[:]
             self.space.add(*self.shapes)
