@@ -17,40 +17,39 @@ import threading
 import random
 from hud import Hud
 
-print("Fetching live stream...")
 live_stream = None
 live_chat_id = None
 subscribers = None
 
-# Fetch live streams
-print("Checking for specific live stream")
-if config["LIVESTREAM_ID"] is not None and config["LIVESTREAM_ID"] != "":
-    live_stream = get_live_stream(config["LIVESTREAM_ID"])
+if config["CHAT_CONTROL"] == "true":
+    print("Checking for specific live stream")
+    if config["LIVESTREAM_ID"] is not None and config["LIVESTREAM_ID"] != "":
+        live_stream = get_live_stream(config["LIVESTREAM_ID"])
 
-if live_stream is None:
-    print("No specific live stream found. App will run without it.")
-else:
-    print("Live stream found:", live_stream["snippet"]["title"])
+    if live_stream is None:
+        print("No specific live stream found. App will run without it.")
+    else:
+        print("Live stream found:", live_stream["snippet"]["title"])
 
-# get chat id from live stream
-if live_stream is not None:
-    print("Fetching live chat ID...")
-    live_chat_id = get_live_chat_id(live_stream["id"])
+    # get chat id from live stream
+    if live_stream is not None:
+        print("Fetching live chat ID...")
+        live_chat_id = get_live_chat_id(live_stream["id"])
 
-if live_chat_id is None:
-    print("No live chat ID found. App will run without it.")
-else:
-    print("Live chat ID found:", live_chat_id)
+    if live_chat_id is None:
+        print("No live chat ID found. App will run without it.")
+    else:
+        print("Live chat ID found:", live_chat_id)
 
-# get subscribers count
-if(config["CHANNEL_ID"] is not None and config["CHANNEL_ID"] != ""):
-    print("Fetching subscribers count...")
-    subscribers = get_subscriber_count(config["CHANNEL_ID"])
+    # get subscribers count
+    if(config["CHANNEL_ID"] is not None and config["CHANNEL_ID"] != ""):
+        print("Fetching subscribers count...")
+        subscribers = get_subscriber_count(config["CHANNEL_ID"])
 
-if subscribers is None:
-    print("No subscribers count found. App will run without it.")
-else:
-    print("Subscribers count found:", subscribers)
+    if subscribers is None:
+        print("No subscribers count found. App will run without it.")
+    else:
+        print("Subscribers count found:", subscribers)
 
 # Queues for chat 
 tnt_queue = []
