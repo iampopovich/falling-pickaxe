@@ -1,6 +1,14 @@
 # Falling Pickaxe
 Falling Pickaxe Game inspired from YouTube shorts livestreams.
 
+You can check my video here:  
+https://www.youtube.com/watch?v=gcjeidHWEb4
+<div align="left">
+      <a href="https://www.youtube.com/watch?v=gcjeidHWEb4">
+         <img src="https://img.youtube.com/vi/gcjeidHWEb4/0.jpg" style="width:40%;">
+      </a>
+</div>
+
 ## Before you use it
 If you consider streaming this game on your own youtube channel, please add credits in the description of your video/livestream. Credits should inclue a link to this repository and [a link to my youtube channel.](https://www.youtube.com/@vycdev) 
 
@@ -23,6 +31,10 @@ GH: https://github.com/vycdev/falling-pickaxe
 6. Enter your credentials in the configuration file.
 7. Set your youtube channel id and livestream id int he configuration file.  
 8. Change configuration to your liking
+9. Now you can start the program using 
+```
+   python ./src/main.py
+```
 
 Steps 4 to 8 are **optional**. You can disable the entire Youtube integration by setting the property: `"CHAT_CONTROL": false`
 
@@ -44,3 +56,6 @@ Step into the world of **Falling Pickaxe**, the most addictive and interactive m
 - **Community-Driven Challenges:** Host live competitions, subscriber challenges, and donation-triggered events that make every stream a unique and engaging event. Build a loyal community and watch your subscriber count soar!
 
 Transform your YouTube channel into a money-making, interactive gaming hub with **Falling Pickaxe** – the ultimate mining adventure that delivers explosive action, high viewer engagement, and serious revenue potential. Start streaming today and experience the thrill of interactive arcade gaming like never before!
+
+## Inspiration 
+As I showed you in the video my inspiration was [Petyr](https://www.youtube.com/@petyrguardian) and the other YouTubers who made their own version of the Falling Pickaxe game. Huge thanks to them.  
