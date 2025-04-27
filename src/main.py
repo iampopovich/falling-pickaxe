@@ -392,7 +392,7 @@ def game():
             log_dir = Path(__file__).parent.parent / "logs"
             log_dir.mkdir(parents=True, exist_ok=True)
             with open(log_dir / "progress.txt", "a+") as f:
-                f.write(f"Date: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f.write(f"Date: {time.strftime('%Y-%m-%d %H:%M:%S')} | ")
                 f.write(f"Y: {-int(pickaxe.body.position.y // BLOCK_SIZE)} ")
                 f.write(f"coal: {hud.amounts['coal']} ")
                 f.write(f"iron: {hud.amounts['iron_ingot']} ")   
@@ -401,7 +401,7 @@ def game():
                 f.write(f"redstone: {hud.amounts['redstone']} ")
                 f.write(f"lapis: {hud.amounts['lapis_lazuli']} ")
                 f.write(f"diamond: {hud.amounts['diamond']} ")
-                f.write(f"emerald: {hud.amounts['emerald']} ")
+                f.write(f"emerald: {hud.amounts['emerald']} \n")
 
         # Update the display
         pygame.display.flip()
