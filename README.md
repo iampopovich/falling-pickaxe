@@ -36,6 +36,8 @@ GH: https://github.com/vycdev/falling-pickaxe
    python ./src/main.py
 ```
 
+Optionally you can use `run.ps1` which will run the game and restart it in the case of unexpected crashes. This is suitable for an unattended stream. 
+
 Steps 4 to 8 are **optional**. You can disable the entire Youtube integration by setting the property: `"CHAT_CONTROL": false`
 
 ## Contributing 
