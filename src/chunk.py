@@ -1,5 +1,4 @@
 import pygame
-import noise  # For procedural generation
 import random
 from block import Block
 from constants import BLOCK_SIZE, CHUNK_HEIGHT, CHUNK_WIDTH, SEED
