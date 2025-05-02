@@ -40,6 +40,23 @@ Optionally you can use `run.ps1` which will run the game and restart it in the c
 
 Steps 4 to 8 are **optional**. You can disable the entire Youtube integration by setting the property: `"CHAT_CONTROL": false`
 
+### Available chat commands 
+```
+tnt
+
+fast 
+slow 
+
+big
+
+wood
+stone
+iron 
+gold
+diamond
+netherite
+```
+
 ## Contributing 
 Any kind of improvements to the code, refactoring, new features, bug fixes, ideas, or anything else is welcome. You can open an issue or a pull requets and I will review it as soon as I can. 
 
