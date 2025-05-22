@@ -20,6 +20,8 @@ GH: https://github.com/vycdev/falling-pickaxe
 ```
 
 ## How to use it 
+*Update: You can watch my tutorial here: https://youtu.be/aFrvoFE7r_g*
+
 1. Make sure you have python installed. If you don't follow the instructions from the official [python website](http://python.org/downloads/)
 2. Install packages
  ```
