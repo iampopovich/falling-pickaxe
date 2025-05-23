@@ -174,7 +174,7 @@ class MegaTnt(Tnt):
         current_time = pygame.time.get_ticks()
         if current_time - self.spawn_time >= 4000:
             self.explode(explosions)
-            camera.shake(15, 15)  # Shake camera for 15 frames with intensity 15
+            camera.shake(15, 30)  # Shake camera for 15 frames with intensity 15
 
     def draw(self, screen, camera):
         if self.detonated:
