@@ -28,4 +28,4 @@ class Camera:
             self.offset_x += (random.uniform(-self.shake_intensity, self.shake_intensity) * damping_factor + self.bias_x) * 0.5 # Less horizontal shake
             self.shake_timer -= 1
         else:
-            self.offset_x = 0
+            self.offset_x = (0 - self.offset_x) * smoothing
