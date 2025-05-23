@@ -7,7 +7,7 @@ from chunk import chunks
 from explosion import Explosion
 
 class Tnt:
-    def __init__(self, space, x, y, texture_atlas, atlas_items, sound_manager, velocity=0, rotation=0, mass=70):
+    def __init__(self, space, x, y, texture_atlas, atlas_items, sound_manager, owner_name=None, velocity=0, rotation=0, mass=70):
         print("Spawning TNT")
         self.texture_atlas = texture_atlas
         self.atlas_items = atlas_items
@@ -36,95 +36,155 @@ class Tnt:
         self.shape.block_ref = self  # Reference to the block object
 
         self.sound_manager = sound_manager
-
-        sound_manager.play_sound("tnt")
+        self.sound_manager.play_sound("tnt")
 
         self.space.add(self.body, self.shape)
 
-        # Add collision handler for pickaxe & blocks
-        handler = space.add_collision_handler(3, 2)  # (Pickaxe type, Block type)
+        handler = space.add_collision_handler(3, 2)  # TNT & Block collision
         handler.post_solve = self.on_collision
 
         self.detonated = False
         self.spawn_time = pygame.time.get_ticks()
 
-    def on_collision(self, arbiter, space, data):
-        """Handles collision with blocks: Reduce HP or destroy the block."""
+        # Owner name (nick from chat)
+        self.owner_name = owner_name
+        self.font = pygame.font.Font(None, 70)
 
-        # Add small random rotation on hit
+    def on_collision(self, arbiter, space, data):
+        # Small random rotation on collision
         self.body.angle += random.choice([0.01, -0.01])
 
     def explode(self, explosions):
         explosion_radius = 3 * BLOCK_SIZE  # Explosion radius in pixels
         self.detonated = True
 
-        # Iterate over all chunks
         for chunk in chunks:
             for row in chunks[chunk]:
                 for block in row:
-                    # Skip blocks that might already be destroyed
                     if block is None or getattr(block, "destroyed", False):
                         continue
 
-                    # Calculate distance from TNT to block center
                     dx = block.body.position.x - self.body.position.x
                     dy = block.body.position.y - self.body.position.y
                     distance = math.hypot(dx, dy)
 
-                    # If the block is within the explosion radius, damage it
                     if distance <= explosion_radius:
-                        # Calculate damage as a function of distance
-                        # Full damage at the center, decreasing linearly to 0 at explosion_radius
                         damage = int(100 * (1 - (distance / explosion_radius)))
-                        # Apply the damage (using block.take_damage if you have such a method,
-                        # or directly reducing block.hp)
                         block.hp -= damage
 
         explosion = Explosion(self.body.position, self.texture_atlas, self.atlas_items, particle_count=20)
         explosions.append(explosion)
 
     def update(self, tnt_list, explosions):
-        """Update TNT physics like gravity and rotation."""
         if self.detonated:
             self.space.remove(self.body, self.shape)
-            tnt_list.remove(self)
+            if self in tnt_list:
+                tnt_list.remove(self)
             return
-        
+
         # Limit falling speed (terminal velocity)
         if self.body.velocity.y > 1000:
             self.body.velocity = (self.body.velocity.x, 1000)
 
-        # after 4 seconds, explode
         current_time = pygame.time.get_ticks()
         if current_time - self.spawn_time >= 4000:
             self.explode(explosions)
 
     def draw(self, screen, camera):
-        """Draw the TNT at its current position with a blinking white overlay that respects rotation."""
-
         if self.detonated:
             return
 
-        # Rotate the TNT texture and get its rect
+        # Draw TNT texture with rotation
         rotated_image = pygame.transform.rotate(self.texture, -math.degrees(self.body.angle))
         rect = rotated_image.get_rect(center=(self.body.position.x, self.body.position.y))
         rect.y -= camera.offset_y
         screen.blit(rotated_image, rect)
 
-        # Blinking effect: Compute a pulsating alpha using a sine wave.
+        # Blinking effect: pulsating white overlay
         blink_period = 500  # 1 second cycle
         current_time = pygame.time.get_ticks() % blink_period
         brightness = (math.sin(current_time / blink_period * 2 * math.pi) + 1) / 2  # range 0-1
-        alpha = int(brightness * 192)  # maximum 50% opacity
+        alpha = int(brightness * 192)  # maximum 75% opacity
 
-        # Create a white overlay at the original texture size with per-pixel alpha
         white_overlay = pygame.Surface(self.texture.get_size(), pygame.SRCALPHA)
         white_overlay.fill((255, 255, 255, alpha))
-        
-        # Rotate the white overlay using the same angle as the TNT
+
         rotated_overlay = pygame.transform.rotate(white_overlay, -math.degrees(self.body.angle))
         overlay_rect = rotated_overlay.get_rect(center=(self.body.position.x, self.body.position.y))
         overlay_rect.y -= camera.offset_y
-
-        # Blit the rotated overlay on top of the TNT
         screen.blit(rotated_overlay, overlay_rect)
+
+        # Draw owner name above TNT
+        if self.owner_name:
+            text_surface = self.font.render(self.owner_name, True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(self.body.position.x, self.body.position.y - 55 - camera.offset_y))
+            shadow = self.font.render(self.owner_name, True, (0, 0, 0))
+            shadow_rect = shadow.get_rect(center=(self.body.position.x + 1, self.body.position.y - 54 - camera.offset_y))
+            screen.blit(shadow, shadow_rect)
+            screen.blit(text_surface, text_rect)
+
+class MegaTnt(Tnt):
+    def __init__(self, space, x, y, texture_atlas, atlas_items, sound_manager, owner_name=None, velocity=0, rotation=0, mass=100):
+        super().__init__(space, x, y, texture_atlas, atlas_items, sound_manager, owner_name, velocity, rotation, mass)
+        print("Spawning MegaTNT")
+        self.name = "mega_tnt"
+        self.scale_multiplier = 2
+
+        rect = atlas_items["block"]["mega_tnt"]
+        self.texture = pygame.transform.scale_by(texture_atlas.subsurface(rect), self.scale_multiplier)
+
+        width, height = self.texture.get_size()
+        self.shape.unsafe_set_vertices(pymunk.Poly.create_box(self.body, (width, height)).get_vertices())
+
+    def explode(self, explosions):
+        explosion_radius = 3 * BLOCK_SIZE * self.scale_multiplier
+        self.detonated = True
+
+        for chunk in chunks:
+            for row in chunks[chunk]:
+                for block in row:
+                    if block is None or getattr(block, "destroyed", False):
+                        continue
+
+                    dx = block.body.position.x - self.body.position.x
+                    dy = block.body.position.y - self.body.position.y
+                    distance = math.hypot(dx, dy)
+
+                    if distance <= explosion_radius:
+                        damage = int(100 * self.scale_multiplier * (1 - (distance / explosion_radius)))
+                        block.hp -= damage
+
+        explosion = Explosion(self.body.position, self.texture_atlas, self.atlas_items, particle_count=40)
+        explosions.append(explosion)
+
+    def draw(self, screen, camera):
+        if self.detonated:
+            return
+
+        rotated_image = pygame.transform.rotate(self.texture, -math.degrees(self.body.angle))
+        rect = rotated_image.get_rect(center=(self.body.position.x, self.body.position.y))
+        rect.y -= camera.offset_y
+        screen.blit(rotated_image, rect)
+
+        # Blinking effect: pulsating white overlay
+        blink_period = 500
+        current_time = pygame.time.get_ticks() % blink_period
+        brightness = (math.sin(current_time / blink_period * 2 * math.pi) + 1) / 2
+        alpha = int(brightness * 192)
+
+        white_overlay = pygame.Surface(self.texture.get_size(), pygame.SRCALPHA)
+        white_overlay.fill((255, 255, 255, alpha))
+
+        rotated_overlay = pygame.transform.rotate(white_overlay, -math.degrees(self.body.angle))
+        overlay_rect = rotated_overlay.get_rect(center=(self.body.position.x, self.body.position.y))
+        overlay_rect.y -= camera.offset_y
+        screen.blit(rotated_overlay, overlay_rect)
+
+        # Draw owner name above MegaTNT
+        if self.owner_name:
+            text_surface = self.font.render(self.owner_name, True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(self.body.position.x, self.body.position.y - 55 - camera.offset_y))
+            shadow = self.font.render(self.owner_name, True, (0, 0, 0))
+            shadow_rect = shadow.get_rect(center=(self.body.position.x + 1, self.body.position.y - 54 - camera.offset_y))
+            screen.blit(shadow, shadow_rect)
+            screen.blit(text_surface, text_rect)
