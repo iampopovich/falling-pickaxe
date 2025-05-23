@@ -19,6 +19,8 @@ YT: https://www.youtube.com/@vycdev
 GH: https://github.com/vycdev/falling-pickaxe
 ```
 
+Donations on [YouTube (Super Thanks)](https://www.youtube.com/watch?v=gcjeidHWEb4) or showing support on [Patreon](https://patreon.com/vycdev?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink) is also highly appreciated.  
+
 ## How to use it 
 *Update: You can watch my tutorial here: https://youtu.be/aFrvoFE7r_g*
 
