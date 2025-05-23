@@ -27,15 +27,19 @@ GH: https://github.com/vycdev/falling-pickaxe
  ```
     pip install -r requirements.txt
  ```
-3. Rename `default.config.json` to `config.json`
+3. Make a copy of `default.config.json` to `config.json` or run the game once to automatically copy the config file into `config.json`
 4. Create your Google API Key for YouTube. 
 5. Enable the YouTube Data API v3 for your Google Cloud Project.  
 6. Enter your credentials in the configuration file.
-7. Set your youtube channel id and livestream id int he configuration file.  
+7. Set your youtube channel id and livestream id in the configuration file.  
 8. Change configuration to your liking
 9. Now you can start the program using 
 ```
    python ./src/main.py
+```
+or 
+```
+./run.ps1
 ```
 
 Optionally you can use `run.ps1` which will run the game and restart it in the case of unexpected crashes, you can exit this mode by pressing **CTRL + C**. This is suitable for an unattended stream. 
