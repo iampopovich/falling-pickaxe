@@ -90,7 +90,6 @@ async def handle_youtube_poll():
                  tnt_superchat_queue.append((author, text))
                  print(f"Added {author} to Superchat TNT queue")
 
-
         if "fast" in text.lower() and author not in [entry[0] for entry in fast_slow_queue]:
             fast_slow_queue.append((author, "Fast"))
             print(f"Added {author} to Fast/Slow queue (Fast)")
