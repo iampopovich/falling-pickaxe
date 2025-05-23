@@ -39,7 +39,7 @@ GH: https://github.com/vycdev/falling-pickaxe
 ```
 or 
 ```
-./run.ps1
+   ./run.ps1
 ```
 
 Optionally you can use `run.ps1` which will run the game and restart it in the case of unexpected crashes, you can exit this mode by pressing **CTRL + C**. This is suitable for an unattended stream. 
