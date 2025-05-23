@@ -88,6 +88,17 @@ def generate_first_chunk(texture_atlas, atlas_items, space):
         chunk.append(row)
     return chunk
 
+def generate_side_chunk(chunk_x, chunk_y, texture_atlas, atlas_items, space):
+    chunk = []
+    for y in range(CHUNK_HEIGHT):
+        row = []
+        for x in range(CHUNK_WIDTH):
+            block_x = (chunk_x * CHUNK_WIDTH + x) * BLOCK_SIZE
+            block_y = (chunk_y * CHUNK_HEIGHT + y) * BLOCK_SIZE
+            row.append(Block(space, block_x, block_y, "bedrock", texture_atlas, atlas_items))
+        chunk.append(row)
+    return chunk
+
 # Function to generate chunks using Perlin noise
 def generate_chunk(chunk_x, chunk_y, texture_atlas, atlas_items, space):
     if(chunk_y <= 0):
@@ -120,8 +131,11 @@ def get_block(chunk_x, chunk_y, x, y, texture_atlas, atlas_items, space):
         return None
 
     if (chunk_x, chunk_y) not in chunks:
-        chunks[(chunk_x, chunk_y)] = generate_chunk(chunk_x, chunk_y, texture_atlas, atlas_items, space)
-
+        if(chunk_x == 0):
+            chunks[(chunk_x, chunk_y)] = generate_chunk(chunk_x, chunk_y, texture_atlas, atlas_items, space)
+        else:
+            chunks[(chunk_x, chunk_y)] = generate_side_chunk(chunk_x, chunk_y, texture_atlas, atlas_items, space)
+            
     return chunks[(chunk_x, chunk_y)][y][x]
 
 def delete_block(chunk_x, chunk_y, x, y):

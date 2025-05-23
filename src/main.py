@@ -323,9 +323,9 @@ def game():
             fast_slow_active = False
             last_fast_slow = current_time
 
-        # Update and draw all TNT objects
+        # Update all TNTs
         for tnt in tnt_list:
-            tnt.update(tnt_list, explosions)
+            tnt.update(tnt_list, explosions, camera)
 
         # Poll Yotutube api 
         if live_chat_id is not None and current_time - last_yt_poll >= yt_poll_interval:
@@ -349,12 +349,11 @@ def game():
             # Handle MegaTNT (New Subscriber)
             if mega_tnt_queue:
                 author = mega_tnt_queue.pop(0)
-                print(f"Spawning MegaTNT for {author}")
+                print(f"Spawning MegaTNT for {author} (New Subscriber)")
                 new_megatnt = MegaTnt(space, pickaxe.body.position.x, pickaxe.body.position.y - 100,
                       texture_atlas, atlas_items, sound_manager, owner_name=author)
                 tnt_list.append(new_megatnt)
                 last_tnt_spawn = current_time 
-
 
             # Handle Superchat/Supersticker TNT
             if tnt_superchat_queue:
@@ -395,16 +394,17 @@ def game():
         clean_chunks(start_chunk_y)
 
         # Draw blocks in visible chunks
-        for chunk_y in range(start_chunk_y, end_chunk_y):
-            for y in range(CHUNK_HEIGHT):
-                for x in range(CHUNK_WIDTH):
-                    block = get_block(0, chunk_y, x, y, texture_atlas, atlas_items, space)
-                    
-                    if block == None:
-                        continue
-                    
-                    block.update(space, hud)
-                    block.draw(internal_surface, camera)
+        for chunk_x in range(-1, 2):
+            for chunk_y in range(start_chunk_y, end_chunk_y):
+                for y in range(CHUNK_HEIGHT):
+                    for x in range(CHUNK_WIDTH):
+                        block = get_block(chunk_x, chunk_y, x, y, texture_atlas, atlas_items, space)
+                        
+                        if block == None:
+                            continue
+                        
+                        block.update(space, hud)
+                        block.draw(internal_surface, camera)
 
         # Draw pickaxe
         pickaxe.draw(internal_surface, camera)

@@ -135,7 +135,7 @@ class Block:
         if(self.destroyed):
             return
 
-        block_x = self.body.position.x - BLOCK_SIZE // 2
+        block_x = self.body.position.x - camera.offset_x - BLOCK_SIZE // 2
         block_y = self.body.position.y - camera.offset_y - BLOCK_SIZE // 2
 
         screen.blit(self.texture, (block_x, block_y))

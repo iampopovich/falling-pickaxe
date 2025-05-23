@@ -57,7 +57,7 @@ class ExplosionParticle:
 
         # Scale texture to the desired size
         # Adjust drawing position by camera offset (if only vertical, subtract camera.offset_y)
-        draw_pos = (self.pos.x, self.pos.y - camera.offset_y)
+        draw_pos = (self.pos.x - camera.offset_x, self.pos.y - camera.offset_y)
 
         screen.blit(texture, draw_pos)
 

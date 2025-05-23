@@ -175,7 +175,7 @@ class Pickaxe:
         if min_x < left_limit:
             dx = left_limit - min_x
             self.body.position = (self.body.position.x + dx, self.body.position.y)
-            
+
         # If any part is right of the right limit, shift the body left
         if max_x > right_limit:
             dx = max_x - right_limit
@@ -191,6 +191,7 @@ class Pickaxe:
         rotated_image = pygame.transform.rotate(self.texture, -math.degrees(self.body.angle))  # Convert to degrees
         rect = rotated_image.get_rect(center=(self.body.position.x, self.body.position.y))
         rect.y -= camera.offset_y
+        rect.x -= camera.offset_x
         screen.blit(rotated_image, rect)
 
     def enlarge(self, duration=5000):

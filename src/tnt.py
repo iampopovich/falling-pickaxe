@@ -75,7 +75,7 @@ class Tnt:
         explosion = Explosion(self.body.position, self.texture_atlas, self.atlas_items, particle_count=20)
         explosions.append(explosion)
 
-    def update(self, tnt_list, explosions):
+    def update(self, tnt_list, explosions, camera):
         if self.detonated:
             self.space.remove(self.body, self.shape)
             if self in tnt_list:
@@ -89,6 +89,7 @@ class Tnt:
         current_time = pygame.time.get_ticks()
         if current_time - self.spawn_time >= 4000:
             self.explode(explosions)
+            camera.shake(10, 10)  # Shake camera for 10 frames with intensity 10
 
     def draw(self, screen, camera):
         if self.detonated:
@@ -98,6 +99,7 @@ class Tnt:
         rotated_image = pygame.transform.rotate(self.texture, -math.degrees(self.body.angle))
         rect = rotated_image.get_rect(center=(self.body.position.x, self.body.position.y))
         rect.y -= camera.offset_y
+        rect.x -= camera.offset_x
         screen.blit(rotated_image, rect)
 
         # Blinking effect: pulsating white overlay
@@ -112,14 +114,15 @@ class Tnt:
         rotated_overlay = pygame.transform.rotate(white_overlay, -math.degrees(self.body.angle))
         overlay_rect = rotated_overlay.get_rect(center=(self.body.position.x, self.body.position.y))
         overlay_rect.y -= camera.offset_y
+        overlay_rect.x -= camera.offset_x
         screen.blit(rotated_overlay, overlay_rect)
 
         # Draw owner name above TNT
         if self.owner_name:
             text_surface = self.font.render(self.owner_name, True, (255, 255, 255))
-            text_rect = text_surface.get_rect(center=(self.body.position.x, self.body.position.y - 55 - camera.offset_y))
+            text_rect = text_surface.get_rect(center=(self.body.position.x - camera.offset_x, self.body.position.y - 55 - camera.offset_y))
             shadow = self.font.render(self.owner_name, True, (0, 0, 0))
-            shadow_rect = shadow.get_rect(center=(self.body.position.x + 1, self.body.position.y - 54 - camera.offset_y))
+            shadow_rect = shadow.get_rect(center=(self.body.position.x + 1 - camera.offset_x, self.body.position.y - 54 - camera.offset_y))
             screen.blit(shadow, shadow_rect)
             screen.blit(text_surface, text_rect)
 
@@ -157,6 +160,22 @@ class MegaTnt(Tnt):
         explosion = Explosion(self.body.position, self.texture_atlas, self.atlas_items, particle_count=40)
         explosions.append(explosion)
 
+    def update(self, tnt_list, explosions, camera):
+        if self.detonated:
+            self.space.remove(self.body, self.shape)
+            if self in tnt_list:
+                tnt_list.remove(self)
+            return
+
+        # Limit falling speed (terminal velocity)
+        if self.body.velocity.y > 1000:
+            self.body.velocity = (self.body.velocity.x, 1000)
+
+        current_time = pygame.time.get_ticks()
+        if current_time - self.spawn_time >= 4000:
+            self.explode(explosions)
+            camera.shake(15, 15)  # Shake camera for 15 frames with intensity 15
+
     def draw(self, screen, camera):
         if self.detonated:
             return
@@ -164,6 +183,7 @@ class MegaTnt(Tnt):
         rotated_image = pygame.transform.rotate(self.texture, -math.degrees(self.body.angle))
         rect = rotated_image.get_rect(center=(self.body.position.x, self.body.position.y))
         rect.y -= camera.offset_y
+        rect.x -= camera.offset_x
         screen.blit(rotated_image, rect)
 
         # Blinking effect: pulsating white overlay
@@ -178,13 +198,14 @@ class MegaTnt(Tnt):
         rotated_overlay = pygame.transform.rotate(white_overlay, -math.degrees(self.body.angle))
         overlay_rect = rotated_overlay.get_rect(center=(self.body.position.x, self.body.position.y))
         overlay_rect.y -= camera.offset_y
+        overlay_rect.x -= camera.offset_x
         screen.blit(rotated_overlay, overlay_rect)
 
         # Draw owner name above MegaTNT
         if self.owner_name:
             text_surface = self.font.render(self.owner_name, True, (255, 255, 255))
-            text_rect = text_surface.get_rect(center=(self.body.position.x, self.body.position.y - 55 - camera.offset_y))
+            text_rect = text_surface.get_rect(center=(self.body.position.x - camera.offset_x, self.body.position.y - 55 - camera.offset_y))
             shadow = self.font.render(self.owner_name, True, (0, 0, 0))
-            shadow_rect = shadow.get_rect(center=(self.body.position.x + 1, self.body.position.y - 54 - camera.offset_y))
+            shadow_rect = shadow.get_rect(center=(self.body.position.x + 1 - camera.offset_x, self.body.position.y - 54 - camera.offset_y))
             screen.blit(shadow, shadow_rect)
             screen.blit(text_surface, text_rect)
