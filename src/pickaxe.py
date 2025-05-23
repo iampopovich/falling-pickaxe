@@ -150,17 +150,38 @@ class Pickaxe:
         elif(name =="netherite_pickaxe"):
             self.damage = 12
 
-
     def update(self):
         """Apply gravity, update movement, check collisions, and rotate."""
         # Manually limit the falling speed (terminal velocity)
         if self.body.velocity.y > 1000:
             self.body.velocity = (self.body.velocity.x, 1000)
 
-        # If pickaxe is outside the screen, reset its position
-        if self.body.position.x < 0 or self.body.position.x > BLOCK_SIZE * CHUNK_WIDTH:
-            self.body.position = (BLOCK_SIZE * CHUNK_WIDTH // 2, self.body.position.y)
+        # --- Bounding box check for bedrock collision ---
+        # Gather all vertices from all shapes, transformed to world coordinates
+        all_vertices = []
+        for shape in self.shapes:
+            for v in shape.get_vertices():
+                # Transform local vertex to world coordinates
+                world_v = self.body.local_to_world(v)
+                all_vertices.append(world_v)
 
+        min_x = min(v.x for v in all_vertices)
+        max_x = max(v.x for v in all_vertices)
+
+        left_limit = BLOCK_SIZE
+        right_limit = BLOCK_SIZE * (CHUNK_WIDTH - 1)
+
+        # If any part is left of the left limit, shift the body right
+        if min_x < left_limit:
+            dx = left_limit - min_x
+            self.body.position = (self.body.position.x + dx, self.body.position.y)
+            
+        # If any part is right of the right limit, shift the body left
+        if max_x > right_limit:
+            dx = max_x - right_limit
+            self.body.position = (self.body.position.x - dx, self.body.position.y)
+
+        # If pickaxe is enlarged, check if time is up
         if hasattr(self, "enlarge_end_time") and pygame.time.get_ticks() > self.enlarge_end_time:
             self.reset_size()
             self.is_enlarged = False
