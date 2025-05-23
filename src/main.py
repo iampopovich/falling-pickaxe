@@ -17,6 +17,11 @@ import threading
 import random
 from hud import Hud
 
+# Track key states
+key_t_pressed = False
+key_m_pressed = False
+
+# 
 live_stream = None
 live_chat_id = None
 subscribers = None
@@ -453,6 +458,35 @@ def game():
         # Update the display
         pygame.display.flip()
         clock.tick(FRAMERATE)  # Cap the frame rate
+
+        # Inside the main loop
+        keys = pygame.key.get_pressed()
+
+        # Handle TNT spawn (key T)
+        if keys[pygame.K_t]:
+            if not key_t_pressed:  # Only spawn if the key was not pressed in the previous frame
+                new_tnt = Tnt(space, pickaxe.body.position.x, pickaxe.body.position.y - 100,
+                            texture_atlas, atlas_items, sound_manager)
+                tnt_list.append(new_tnt)
+                last_tnt_spawn = current_time
+                # New random interval for the next TNT spawn
+                tnt_spawn_interval = 1000 * random.uniform(config["TNT_SPAWN_INTERVAL_SECONDS_MIN"], config["TNT_SPAWN_INTERVAL_SECONDS_MAX"])
+            key_t_pressed = True
+        else:
+            key_t_pressed = False  # Reset the flag when the key is released
+
+        # Handle MegaTNT spawn (key M)
+        if keys[pygame.K_m]:
+            if not key_m_pressed:  # Only spawn if the key was not pressed in the previous frame
+                new_megatnt = MegaTnt(space, pickaxe.body.position.x, pickaxe.body.position.y - 100,
+                                    texture_atlas, atlas_items, sound_manager)
+                tnt_list.append(new_megatnt)
+                last_tnt_spawn = current_time
+                # New random interval for the next TNT spawn
+                tnt_spawn_interval = 1000 * random.uniform(config["TNT_SPAWN_INTERVAL_SECONDS_MIN"], config["TNT_SPAWN_INTERVAL_SECONDS_MAX"])
+            key_m_pressed = True
+        else:
+            key_m_pressed = False  # Reset the flag when the key is released
 
     # Quit pygame properly
     pygame.quit()
