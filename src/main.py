@@ -7,7 +7,7 @@ from config import config
 from atlas import create_texture_atlas 
 from pathlib import Path
 from chunk import get_block, clean_chunks, delete_block, chunks
-from constants import BLOCK_SCALE_FACTOR, BLOCK_SIZE, CHUNK_HEIGHT, CHUNK_WIDTH, INTERNAL_HEIGHT, INTERNAL_WIDTH
+from constants import BLOCK_SCALE_FACTOR, BLOCK_SIZE, CHUNK_HEIGHT, CHUNK_WIDTH, INTERNAL_HEIGHT, INTERNAL_WIDTH, FRAMERATE
 from pickaxe import Pickaxe
 from camera import Camera
 from sound import SoundManager
@@ -140,8 +140,9 @@ asyncio_loop = asyncio.new_event_loop()
 threading.Thread(target=start_event_loop, args=(asyncio_loop,), daemon=True).start()
 
 def game():
-    WINDOW_WIDTH, WINDOW_HEIGHT = 540, 960  # Half of internal resolution
-    
+    window_width = int(INTERNAL_WIDTH / 2)
+    window_height = int(INTERNAL_HEIGHT / 2)
+
     # Initialize pygame
     pygame.init()
     clock = pygame.time.Clock()
@@ -151,7 +152,8 @@ def game():
     space.gravity = (0, 1000)  # (x, y) - down is positive y
 
     # Create a resizable window
-    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
+    screen_size = (window_width, window_height)
+    screen = pygame.display.set_mode(screen_size, pygame.RESIZABLE)
     pygame.display.set_caption("Falling Pickaxe")
     # set icon
     icon = pygame.image.load(Path(__file__).parent.parent / "src/assets/pickaxe" / "diamond_pickaxe.png")
@@ -254,18 +256,18 @@ def game():
                 else:
                     new_height = int(new_width * (16 / 9))
 
-                WINDOW_WIDTH, WINDOW_HEIGHT = new_width, new_height
-                screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
+                window_width, window_height = new_width, new_height
+                screen = pygame.display.set_mode((window_width, window_height), pygame.RESIZABLE)
 
         # ++++++++++++++++++  UPDATE ++++++++++++++++++
         # Determine which chunks are visible
         # Update physics
-        
-        step_speed = 1 / 60.0  # Fixed time step for physics simulation
+
+        step_speed = 1 / FRAMERATE  # Fixed time step for physics simulation
         if fast_slow_active and fast_slow == "Fast":
-            step_speed = 1 / 30
+            step_speed = 1 / (FRAMERATE / 2)
         elif fast_slow_active and fast_slow == "Slow":
-            step_speed = 1 / 120
+            step_speed = 1 / (FRAMERATE * 2)
 
         space.step(step_speed) 
 
@@ -425,7 +427,7 @@ def game():
         hud.draw(internal_surface, pickaxe.body.position.y, fast_slow_active, fast_slow)
 
         # Scale internal surface to fit the resized window
-        scaled_surface = pygame.transform.smoothscale(internal_surface, (WINDOW_WIDTH, WINDOW_HEIGHT))
+        scaled_surface = pygame.transform.smoothscale(internal_surface, (window_width, window_height))
         screen.blit(scaled_surface, (0, 0))
 
         # Save progress
@@ -450,8 +452,8 @@ def game():
 
         # Update the display
         pygame.display.flip()
-        clock.tick(50)  # Cap the frame rate
-        
+        clock.tick(FRAMERATE)  # Cap the frame rate
+
     # Quit pygame properly
     pygame.quit()
 
