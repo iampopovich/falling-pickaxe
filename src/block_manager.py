@@ -97,15 +97,6 @@ class BlockManager:
             if block.hp == block.max_hp and block.first_hit_time is None:
                 self.dirty_blocks.discard(block)
 
-        # 2. Периодически проверяем лечение блоков (раз в секунду)
-        if current_time - self.last_healing_check >= self.healing_check_interval:
-            self._update_healing_blocks(current_time)
-            self.last_healing_check = current_time
-
-        # 3. Раз в 10 кадров обновляем случайную порцию видимых блоков
-        # для проверки новых повреждений
-        if self.frame_counter % 10 == 0:
-            self._update_random_visible_blocks(visible_blocks, space, hud)
 
     def _update_single_block(self, block: Block, space, hud):
         """Обновить один блок"""
@@ -126,46 +117,6 @@ class BlockManager:
             self.dirty_blocks.discard(block)
             self.healing_blocks.discard(block)
             self.cache_valid = False  # Инвалидируем кеш
-
-    def _update_healing_blocks(self, current_time: int):
-        """update healing blocks"""
-        healing_blocks_copy = self.healing_blocks.copy()
-
-        for block in healing_blocks_copy:
-            if block.destroyed:
-                self.healing_blocks.discard(block)
-                continue
-
-            if block.first_hit_time is not None:
-                # Начинаем лечение через 5 секунд после первого урона
-                if current_time - block.first_hit_time >= 5000:
-                    if current_time - block.last_heal_time >= block.heal_interval:
-                        healing_amount = block.max_hp * 0.2
-                        block.hp = min(block.hp + healing_amount, block.max_hp)
-                        block.last_heal_time = current_time
-
-                        # Если блок полностью вылечился, убираем из лечения
-                        if block.hp >= block.max_hp:
-                            block.first_hit_time = None
-                            self.healing_blocks.discard(block)
-                            self.dirty_blocks.discard(block)
-
-    def _update_random_visible_blocks(self, visible_blocks: List, space, hud):
-        """update random visible blocks"""
-        if not visible_blocks:
-            return
-
-        # Обновляем только 10% видимых блоков за раз
-        sample_size = max(1, len(visible_blocks) // 10)
-
-        import random
-        sample_blocks = random.sample(visible_blocks, min(sample_size, len(visible_blocks)))
-
-        for block in sample_blocks:
-            if block not in self.dirty_blocks and not block.destroyed:
-                # Проверяем, не был ли блок поврежден
-                if block.hp < block.max_hp:
-                    self.mark_block_dirty(block)
 
     def _add_block_resources(self, block: Block, hud):
         """Add resources to HUD based on block type."""
