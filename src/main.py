@@ -1,10 +1,10 @@
 import time
 import pygame
 import pymunk
-import pymunk.pygame_util   
-from youtube import get_live_stream, get_new_live_chat_messages, get_live_chat_id, get_subscriber_count
+import pymunk.pygame_util
+from youtube import get_live_stream, get_new_live_chat_messages, get_live_chat_id, get_subscriber_count, validate_live_stream_id
 from config import config
-from atlas import create_texture_atlas 
+from atlas import create_texture_atlas
 from pathlib import Path
 from chunk import get_block, clean_chunks, delete_block, chunks
 from constants import BLOCK_SCALE_FACTOR, BLOCK_SIZE, CHUNK_HEIGHT, CHUNK_WIDTH, INTERNAL_HEIGHT, INTERNAL_WIDTH, FRAMERATE
@@ -21,7 +21,7 @@ from hud import Hud
 key_t_pressed = False
 key_m_pressed = False
 
-# 
+#
 live_stream = None
 live_chat_id = None
 subscribers = None
@@ -29,7 +29,8 @@ subscribers = None
 if config["CHAT_CONTROL"] == True:
     print("Checking for specific live stream")
     if config["LIVESTREAM_ID"] is not None and config["LIVESTREAM_ID"] != "":
-        live_stream = get_live_stream(config["LIVESTREAM_ID"])
+        stream_id = validate_live_stream_id(config["LIVESTREAM_ID"])
+        live_stream = get_live_stream(stream_id)
 
     if live_stream is None:
         print("No specific live stream found. App will run without it.")
@@ -56,7 +57,7 @@ if config["CHAT_CONTROL"] == True:
     else:
         print("Subscribers count found:", subscribers)
 
-# Queues for chat 
+# Queues for chat
 tnt_queue = []
 tnt_superchat_queue = []
 fast_slow_queue = []
@@ -152,7 +153,7 @@ def game():
     pygame.init()
     clock = pygame.time.Clock()
 
-    # Pymunk physics 
+    # Pymunk physics
     space = pymunk.Space()
     space.gravity = (0, 1000)  # (x, y) - down is positive y
 
@@ -168,19 +169,19 @@ def game():
     internal_surface = pygame.Surface((INTERNAL_WIDTH, INTERNAL_HEIGHT))
 
     # Load texture atlas
-    assets_dir = Path(__file__).parent.parent / "src/assets" 
+    assets_dir = Path(__file__).parent.parent / "src/assets"
     (texture_atlas, atlas_items) = create_texture_atlas(assets_dir)
-    
-    # Load background 
+
+    # Load background
     background_image = pygame.image.load(assets_dir / "background.png")
-    background_scale_factor = 1.5  
+    background_scale_factor = 1.5
     background_width = int(background_image.get_width() * background_scale_factor)
     background_height = int(background_image.get_height() * background_scale_factor)
     background_image = pygame.transform.scale(background_image, (background_width, background_height))
 
     # Scale the entire texture atlas
-    texture_atlas = pygame.transform.scale(texture_atlas, 
-                                        (texture_atlas.get_width() * BLOCK_SCALE_FACTOR, 
+    texture_atlas = pygame.transform.scale(texture_atlas,
+                                        (texture_atlas.get_width() * BLOCK_SCALE_FACTOR,
                                         texture_atlas.get_height() * BLOCK_SCALE_FACTOR))
 
     for category in atlas_items:
@@ -188,7 +189,7 @@ def game():
             x, y, w, h = atlas_items[category][item]
             atlas_items[category][item] = (x * BLOCK_SCALE_FACTOR, y * BLOCK_SCALE_FACTOR, w * BLOCK_SCALE_FACTOR, h * BLOCK_SCALE_FACTOR)
 
-    #sounds 
+    #sounds
     sound_manager = SoundManager()
 
     sound_manager.load_sound("tnt", assets_dir / "sounds" / "tnt.mp3", 0.3)
@@ -206,19 +207,19 @@ def game():
 
     # TNT
     last_tnt_spawn = pygame.time.get_ticks()
-    tnt_spawn_interval = 1000 * random.uniform(config["TNT_SPAWN_INTERVAL_SECONDS_MIN"], config["TNT_SPAWN_INTERVAL_SECONDS_MAX"]) 
+    tnt_spawn_interval = 1000 * random.uniform(config["TNT_SPAWN_INTERVAL_SECONDS_MIN"], config["TNT_SPAWN_INTERVAL_SECONDS_MAX"])
     tnt_list = []  # List to keep track of spawned TNT objects
 
     # Random Pickaxe
     last_random_pickaxe = pygame.time.get_ticks()
-    random_pickaxe_interval = 1000 * random.uniform(config["RANDOM_PICKAXE_INTERVAL_SECONDS_MIN"], config["RANDOM_PICKAXE_INTERVAL_SECONDS_MAX"]) 
+    random_pickaxe_interval = 1000 * random.uniform(config["RANDOM_PICKAXE_INTERVAL_SECONDS_MIN"], config["RANDOM_PICKAXE_INTERVAL_SECONDS_MAX"])
 
     # Pickaxe enlargement
     last_enlarge = pygame.time.get_ticks()
     enlarge_interval = 1000 * random.uniform(config["PICKAXE_ENLARGE_INTERVAL_SECONDS_MIN"], config["PICKAXE_ENLARGE_INTERVAL_SECONDS_MAX"])
     enlarge_duration = 1000 * config["PICKAXE_ENLARGE_DURATION_SECONDS"]
 
-    # Fast slow 
+    # Fast slow
     fast_slow_active = False
     fast_slow = random.choice(["Fast", "Slow"])
     fast_slow_interval = 1000 * random.uniform(config["FAST_SLOW_INTERVAL_SECONDS_MIN"], config["FAST_SLOW_INTERVAL_SECONDS_MAX"])
@@ -237,7 +238,7 @@ def game():
     yt_poll_interval = 1000 * config["YT_POLL_INTERVAL_SECONDS"]
     last_yt_poll = pygame.time.get_ticks()
 
-    # Save progress interval 
+    # Save progress interval
     save_progress_interval = 1000 * config["SAVE_PROGRESS_INTERVAL_SECONDS"]
     last_save_progress = pygame.time.get_ticks()
 
@@ -248,7 +249,7 @@ def game():
     # Main loop
     running = True
     while running:
-        # ++++++++++++++++++  EVENTS ++++++++++++++++++ 
+        # ++++++++++++++++++  EVENTS ++++++++++++++++++
         for event in pygame.event.get():
             if event.type == pygame.QUIT:  # Close window event
                 running = False
@@ -274,7 +275,7 @@ def game():
         elif fast_slow_active and fast_slow == "Slow":
             step_speed = 1 / (FRAMERATE * 2)
 
-        space.step(step_speed) 
+        space.step(step_speed)
 
         start_chunk_y = int(pickaxe.body.position.y // (CHUNK_HEIGHT * BLOCK_SIZE) - 1) - 1
         end_chunk_y = int(pickaxe.body.position.y + INTERNAL_HEIGHT) // (CHUNK_HEIGHT * BLOCK_SIZE)  + 1
@@ -301,7 +302,7 @@ def game():
              tnt_list.append(new_tnt)
              last_tnt_spawn = current_time
              # New random interval for the next TNT spawn
-             tnt_spawn_interval = 1000 * random.uniform(config["TNT_SPAWN_INTERVAL_SECONDS_MIN"], config["TNT_SPAWN_INTERVAL_SECONDS_MAX"]) 
+             tnt_spawn_interval = 1000 * random.uniform(config["TNT_SPAWN_INTERVAL_SECONDS_MIN"], config["TNT_SPAWN_INTERVAL_SECONDS_MAX"])
 
         # Check if it's time to change the pickaxe (random)
         if (not config["CHAT_CONTROL"] or not pickaxe_queue) and current_time - last_random_pickaxe >= random_pickaxe_interval:
@@ -334,7 +335,7 @@ def game():
         for tnt in tnt_list:
             tnt.update(tnt_list, explosions, camera)
 
-        # Poll Yotutube api 
+        # Poll Yotutube api
         if live_chat_id is not None and current_time - last_yt_poll >= yt_poll_interval:
             print("Polling YouTube API...")
             last_yt_poll = current_time
@@ -343,7 +344,7 @@ def game():
         # Process chat queues
         if config["CHAT_CONTROL"] and current_time - last_queues_pop >= queues_pop_interval:
             last_queues_pop = current_time
-            
+
             # Handle regular TNT from chat command
             if tnt_queue:
                 author = tnt_queue.pop(0)
@@ -351,8 +352,8 @@ def game():
                 new_tnt = Tnt(space, pickaxe.body.position.x, pickaxe.body.position.y - 100,
                              texture_atlas, atlas_items, sound_manager, owner_name=author)
                 tnt_list.append(new_tnt)
-                last_tnt_spawn = current_time 
-            
+                last_tnt_spawn = current_time
+
             # Handle MegaTNT (New Subscriber)
             if mega_tnt_queue:
                 author = mega_tnt_queue.pop(0)
@@ -360,17 +361,17 @@ def game():
                 new_megatnt = MegaTnt(space, pickaxe.body.position.x, pickaxe.body.position.y - 100,
                       texture_atlas, atlas_items, sound_manager, owner_name=author)
                 tnt_list.append(new_megatnt)
-                last_tnt_spawn = current_time 
+                last_tnt_spawn = current_time
 
             # Handle Superchat/Supersticker TNT
             if tnt_superchat_queue:
                 author, text = tnt_superchat_queue.pop(0)
                 print(f"Spawning TNT for {author} (Superchat: {text})")
-                last_tnt_spawn = current_time 
+                last_tnt_spawn = current_time
                 for _ in range(config["TNT_AMOUNT_ON_SUPERCHAT"]):
                     new_tnt = Tnt(space, pickaxe.body.position.x, pickaxe.body.position.y - 100, texture_atlas, atlas_items, sound_manager, owner_name=author)
                     tnt_list.append(new_tnt)
-            
+
             # Handle Fast/Slow command
             if fast_slow_queue:
                 author, q_fast_slow = fast_slow_queue.pop(0)
@@ -397,7 +398,7 @@ def game():
                 random_pickaxe_interval = 1000 * random.uniform(config["RANDOM_PICKAXE_INTERVAL_SECONDS_MIN"], config["RANDOM_PICKAXE_INTERVAL_SECONDS_MAX"])
 
 
-        # Delete chunks 
+        # Delete chunks
         clean_chunks(start_chunk_y)
 
         # Draw blocks in visible chunks
@@ -406,10 +407,10 @@ def game():
                 for y in range(CHUNK_HEIGHT):
                     for x in range(CHUNK_WIDTH):
                         block = get_block(chunk_x, chunk_y, x, y, texture_atlas, atlas_items, space)
-                        
+
                         if block == None:
                             continue
-                        
+
                         block.update(space, hud)
                         block.draw(internal_surface, camera)
 
@@ -424,7 +425,7 @@ def game():
         for explosion in explosions:
             explosion.update()
             explosion.draw(internal_surface, camera)
-            
+
         # Optionally, remove explosions that have no particles left:
         explosions = [e for e in explosions if e.particles]
 
@@ -447,7 +448,7 @@ def game():
                 f.write(f"Date: {time.strftime('%Y-%m-%d %H:%M:%S')} | ")
                 f.write(f"Y: {-int(pickaxe.body.position.y // BLOCK_SIZE)} ")
                 f.write(f"coal: {hud.amounts['coal']} ")
-                f.write(f"iron: {hud.amounts['iron_ingot']} ")   
+                f.write(f"iron: {hud.amounts['iron_ingot']} ")
                 f.write(f"gold: {hud.amounts['gold_ingot']} ")
                 f.write(f"copper: {hud.amounts['copper_ingot']} ")
                 f.write(f"redstone: {hud.amounts['redstone']} ")

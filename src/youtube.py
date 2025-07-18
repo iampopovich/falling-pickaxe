@@ -4,9 +4,45 @@ from datetime import datetime
 from pathlib import Path
 from dateutil import parser
 import os
+import re
 
 # Initialize YouTube API client
 youtube = build("youtube", "v3", developerKey=config["API_KEY"])
+
+def validate_live_stream_id(input_string):
+    """
+    Extracts video ID from YouTube URL or returns the string as is if it's already an ID.
+
+    Supported formats:
+    - https://www.youtube.com/watch?v=uvubgYqg9VQ
+    - https://www.youtube.com/live/uvubgYqg9VQ?si=dfmI1IOGu4NRlxtM
+    - https://youtu.be/uvubgYqg9VQ
+    - uvubgYqg9VQ (direct ID)
+
+    Args:
+        input_string (str): YouTube video URL or ID
+
+    Returns:
+        str: Extracted video ID or None if extraction failed
+    """
+    if not input_string:
+        return None
+
+    # Patterns for different YouTube URL formats
+    patterns = [
+        r'(?:youtube\.com/watch\?v=|youtube\.com/live/)([a-zA-Z0-9_-]{11})',  # watch?v= or live/
+        r'youtu\.be/([a-zA-Z0-9_-]{11})',  # youtu.be/
+        r'^([a-zA-Z0-9_-]{11})$'  # Direct ID (11 characters)
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, input_string)
+        if match:
+            return match.group(1)
+
+    # If nothing found, return None
+    print(f"Failed to extract ID from string: {input_string}")
+    return None
 
 # This consumes a lot of quota (100 units per call)
 def get_live_streams(channel_id):
@@ -45,7 +81,7 @@ def get_live_chat_id(live_stream_id):
         part="liveStreamingDetails",
         id=live_stream_id
     ).execute()
-    
+
     return response["items"][0]["liveStreamingDetails"]["activeLiveChatId"]
 
 def get_live_chat_messages(live_chat_id):
@@ -53,7 +89,7 @@ def get_live_chat_messages(live_chat_id):
         liveChatId=live_chat_id,
         part="snippet,authorDetails"
     ).execute()
-    
+
     for item in response["items"]:
         author = item["authorDetails"]["displayName"]
         message = item["snippet"]["displayMessage"]
@@ -99,7 +135,7 @@ def get_new_live_chat_messages(live_chat_id):
             else:
                 log_message = f"[{timestamp}] {author}: {message}"
 
-            # Write to file 
+            # Write to file
             with open(log_file, "a+", encoding="utf-8") as chat_file:
                 chat_file.write(log_message + "\n")
 
