@@ -1,7 +1,7 @@
 import pygame
 import pymunk
 from constants import BLOCK_SIZE
-import random 
+import random
 
 class Block:
     def __init__(self, space, x, y, name, texture_atlas, atlas_items):
@@ -60,7 +60,7 @@ class Block:
         self.texture_atlas = texture_atlas
         self.atlas_items = atlas_items
 
-        rect = atlas_items["block"][name]  
+        rect = atlas_items["block"][name]
         self.texture = texture_atlas.subsurface(rect)
 
         width, height = self.texture.get_size()
@@ -84,7 +84,23 @@ class Block:
         self.heal_interval = 5000  # Heal every 5 seconds (5000 ms)
         self.first_hit_time = None  # Track the time when the block was first hit
 
+        # Block manager reference for healing and dirtying
+        self.block_manager = None
+
         space.add(self.body, self.shape)
+
+    def take_damage(self, damage):
+        """Нанести урон блоку и уведомить менеджер"""
+        old_hp = self.hp
+        self.hp = max(0, self.hp - damage)
+
+        # Notify the block manager if it exists
+        if self.hp < old_hp and self.block_manager is not None:
+            self.block_manager.mark_block_dirty(self)
+
+    def set_block_manager(self, block_manager):
+        """Set the block manager for this block."""
+        self.block_manager = block_manager
 
     def update(self, space, hud):
         """Update block state"""
@@ -107,7 +123,7 @@ class Block:
 
                     # Reset the healing timer after each heal
                     self.last_heal_time = current_time
-        
+
         if self.hp <= 0 and not self.destroyed:
             self.destroyed = True
             space.remove(self.body, self.shape)  # Remove from physics world
@@ -144,7 +160,7 @@ class Block:
         if self.hp < self.max_hp:
             damage_stage = int((1 - (self.hp / self.max_hp)) * 9)  # Scale hp to 0-9 range
             damage_stage = min(damage_stage, 9)  # Ensure it doesn't exceed stage_9
-            
+
             # Draw the destroy stage overlay
             destroy_texture = self.texture_atlas.subsurface(
                 self.atlas_items["destroy_stage"][f"destroy_stage_{damage_stage}"]

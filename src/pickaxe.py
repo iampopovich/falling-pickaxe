@@ -23,7 +23,7 @@ def rotate_vertices(vertices, angle):
 
             # Offset each rotated vertex by the body's position
             rotated_vertices.append((rotated_x, rotated_y))
-        
+
         return rotated_vertices
 
 class Pickaxe:
@@ -43,7 +43,7 @@ class Pickaxe:
                     (0, 10), # F
                     (110, 110), # G
                 ], -math.pi / 2)
-        
+
         vertices2 = rotate_vertices([
                     (110, 30), # H
                     (120, 40), # I
@@ -52,7 +52,7 @@ class Pickaxe:
                     (100, 40), # L
                     (110, 100), # D
                 ], -math.pi / 2)
-        
+
         vertices3 = rotate_vertices([
                     (30, 110), # M
                     (40, 120), # N
@@ -88,10 +88,8 @@ class Pickaxe:
         block_shape = arbiter.shapes[1]  # Get the block shape
         block = block_shape.block_ref  # Get the actual block instance
 
-        block.first_hit_time = pygame.time.get_ticks()  
-        block.last_heal_time = block.first_hit_time
-
-        block.hp -= self.damage  # Reduce HP when hit
+        # Take damage using the new optimized method
+        block.take_damage(self.damage)
 
         if (block.name == "grass_block" or block.name == "dirt"):
             self.sound_manager.play_sound("grass" + str(random.randint(1, 4)))
@@ -101,7 +99,7 @@ class Pickaxe:
         # Add small random rotation on hit
         self.body.angle += random.choice([0.01, -0.01])
 
-    def random_pickaxe(self, texture_atlas, atlas_items): 
+    def random_pickaxe(self, texture_atlas, atlas_items):
         """Randomly change the pickaxe's properties."""
 
         pickaxe_name = random.choice(list(atlas_items["pickaxe"].keys()))
@@ -113,7 +111,7 @@ class Pickaxe:
             new_size = (BLOCK_SIZE * 3, BLOCK_SIZE * 3)
             self.texture = pygame.transform.scale(self.texture, new_size)
 
-        if(pickaxe_name =="wooden_pickaxe"):  
+        if(pickaxe_name =="wooden_pickaxe"):
             self.damage = 2
         elif(pickaxe_name =="stone_pickaxe"):
             self.damage = 4
@@ -137,7 +135,7 @@ class Pickaxe:
             new_size = (BLOCK_SIZE * 3, BLOCK_SIZE * 3)
             self.texture = pygame.transform.scale(self.texture, new_size)
 
-        if(name =="wooden_pickaxe"):  
+        if(name =="wooden_pickaxe"):
             self.damage = 2
         elif(name =="stone_pickaxe"):
             self.damage = 4
