@@ -1,27 +1,27 @@
 #!/usr/bin/env python3
 """
-Тест функции validate_live_stream_id
+Test functions validate_live_stream_id
 """
 
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-# Импортируем функцию (нужно временно закомментировать API инициализацию в youtube.py для тестирования)
+# Import the function (you need to temporarily comment out the API initialization in youtube.py for testing)
 import re
 
 def validate_live_stream_id(input_string):
     """
-    Извлекает ID видео из YouTube URL или возвращает строку как есть, если это уже ID.
+    Extracts the video ID from a YouTube URL or returns the string as-is if it's already an ID.
     """
     if not input_string:
         return None
     
-    # Паттерны для различных форматов YouTube URL
+    # Patterns for various YouTube URL formats
     patterns = [
-        r'(?:youtube\.com/watch\?v=|youtube\.com/live/)([a-zA-Z0-9_-]{11})',  # watch?v= или live/
+        r'(?:youtube\.com/watch\?v=|youtube\.com/live/)([a-zA-Z0-9_-]{11})',  # watch?v= or live/
         r'youtu\.be/([a-zA-Z0-9_-]{11})',  # youtu.be/
-        r'^([a-zA-Z0-9_-]{11})$'  # Прямой ID (11 символов)
+        r'^([a-zA-Z0-9_-]{11})$'  # Direct ID (11 characters)
     ]
     
     for pattern in patterns:
@@ -31,7 +31,7 @@ def validate_live_stream_id(input_string):
     
     return None
 
-# Тестовые случаи
+# Test cases
 test_cases = [
     "https://www.youtube.com/watch?v=uvubgYqg9VQ",
     "https://www.youtube.com/live/uvubgYqg9VQ?si=dfmI1IOGu4NRlxtM", 
@@ -42,11 +42,11 @@ test_cases = [
     ""
 ]
 
-print("Тестирование функции validate_live_stream_id:")
+print("Function testing validate_live_stream_id:")
 print("=" * 50)
 
 for test_url in test_cases:
     result = validate_live_stream_id(test_url)
-    print(f"Вход: {test_url}")
-    print(f"Результат: {result}")
+    print(f"Input: {test_url}")
+    print(f"Result: {result}")
     print("-" * 30)
