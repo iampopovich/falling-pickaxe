@@ -181,3 +181,6 @@ config.json
 logs/*
 
 .DS_Store
+
+# User-specific files
+.vs
