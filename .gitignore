@@ -179,3 +179,5 @@ config.json
 
 # Ignore logs 
 logs/*
+
+.DS_Store
